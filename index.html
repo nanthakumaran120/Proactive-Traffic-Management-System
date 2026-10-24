@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Traffic Management</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #6d7984;
+      --paper: #f6f8f5;
+      --white: #fff;
+      --line: #dce3dc;
+      --teal: #0d756b;
+      --teal-soft: #e3f1ed;
+      --orange: #df783b;
+      --orange-soft: #fff0e5;
+      --red: #c84d46;
+      --yellow: #d79d26;
+      --green: #1f9569;
+      --navy: #1e3340;
+      --shadow: 0 18px 40px rgba(29, 48, 48, .08);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font: 15px/1.5 Georgia, "Times New Roman", serif; }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { max-width: 1440px; margin: 0 auto; padding: 28px; }
+    .masthead { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 12px 0 24px; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; color: #fff; background: var(--teal); border-radius: 50%; font: 700 22px Georgia, serif; }
+    .eyebrow { margin: 0 0 2px; color: var(--teal); text-transform: uppercase; letter-spacing: .16em; font: 700 10px Arial, sans-serif; }
+    .brand h1 { margin: 0; font-size: 25px; letter-spacing: -.03em; }
+    .profile { display: flex; align-items: center; gap: 10px; color: var(--muted); font-family: Arial, sans-serif; font-size: 13px; }
+    .avatar { width: 34px; height: 34px; display: grid; place-items: center; color: var(--teal); background: var(--teal-soft); border-radius: 50%; font-weight: 700; }
+    .mode-tabs { display: flex; gap: 8px; padding: 18px 0 28px; }
+    .mode-tab { border: 1px solid var(--line); border-radius: 4px; padding: 9px 18px; color: var(--muted); background: transparent; font: 700 12px Arial, sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+    .mode-tab.active, .mode-tab:hover { color: #fff; background: var(--navy); border-color: var(--navy); }
+    .view { display: none; animation: rise .35s ease both; }
+    .view.active { display: block; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin-bottom: 18px; }
+    .section-heading h2 { margin: 0; font-size: clamp(28px, 4vw, 44px); line-height: 1; letter-spacing: -.05em; }
+    .section-heading p { max-width: 410px; margin: 0; color: var(--muted); font-family: Arial, sans-serif; font-size: 13px; }
+    .admin-grid { display: grid; grid-template-columns: 1.35fr .9fr; gap: 18px; }
+    .card { background: var(--white); border: 1px solid var(--line); border-radius: 7px; box-shadow: var(--shadow); }
+    .card-pad { padding: 22px; }
+    .card-title { display: flex; justify-content: space-between; align-items: center; margin: 0 0 18px; font-size: 17px; }
+    .card-title small { color: var(--muted); font: 11px Arial, sans-serif; text-transform: uppercase; letter-spacing: .11em; }
+    .metrics { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .metric { padding: 18px; border-left: 4px solid var(--teal); }
+    .metric:nth-child(2) { border-color: var(--orange); }
+    .metric:nth-child(3) { border-color: var(--red); }
+    .metric:nth-child(4) { border-color: var(--yellow); }
+    .metric span { display: block; color: var(--muted); font: 11px Arial, sans-serif; text-transform: uppercase; letter-spacing: .08em; }
+    .metric strong { display: block; margin-top: 9px; font-size: 29px; letter-spacing: -.04em; }
+    .metric em { color: var(--green); font: 12px Arial, sans-serif; font-style: normal; }
+    .video { min-height: 310px; padding: 0; overflow: hidden; background: var(--navy); color: #fff; }
+    .video-top { display: flex; justify-content: space-between; padding: 15px 18px; font: 700 12px Arial, sans-serif; }
+    .live { color: #ffb0a8; }
+    .video-scene { position: relative; min-height: 240px; overflow: hidden; background: linear-gradient(165deg, #354d55 0 39%, #182e3a 40% 62%, #28434c 63%); }
+    .video-scene:before, .video-scene:after { content: ""; position: absolute; background: rgba(255,255,255,.16); transform: rotate(14deg); }
+    .video-scene:before { width: 140%; height: 2px; top: 67%; left: -15%; box-shadow: 0 24px rgba(255,255,255,.15), 0 48px rgba(255,255,255,.12); }
+    .video-scene:after { width: 18px; height: 150%; left: 48%; top: -20%; transform: rotate(18deg); }
+    .car { position: absolute; bottom: 44px; width: 53px; height: 27px; border-radius: 9px 9px 4px 4px; background: var(--orange); box-shadow: 0 18px 22px rgba(0,0,0,.35); }
+    .car:after { content: ""; position: absolute; left: 10px; top: -9px; width: 33px; height: 13px; background: #e9c9a9; border-radius: 8px 8px 2px 2px; }
+    .car.one { left: 20%; transform: scale(.75); background: var(--yellow); }
+    .car.two { left: 54%; bottom: 92px; transform: scale(1.18); background: var(--red); }
+    .car.three { left: 75%; bottom: 26px; transform: scale(.6); background: var(--green); }
+    .status { margin-top: 18px; padding: 14px 18px; color: #8e4f10; background: var(--orange-soft); border-left: 4px solid var(--orange); font-weight: 700; }
+    .trend { min-height: 328px; }
+    .chart { height: 220px; position: relative; background: repeating-linear-gradient(to bottom, transparent 0 43px, #e7ede8 44px), linear-gradient(to top, #f5faf7, #fff); border-bottom: 1px solid var(--line); overflow: hidden; }
+    .chart svg { width: 100%; height: 100%; }
+    .chart-key { display: flex; gap: 18px; padding-top: 12px; color: var(--muted); font: 11px Arial, sans-serif; }
+    .key:before { content: ""; display: inline-block; width: 18px; height: 3px; margin: 0 6px 3px 0; background: var(--teal); }
+    .key.orange:before { background: var(--orange); }
+    .network { min-height: 328px; }
+    .admin-network { position: relative; width: 100%; height: 260px; background: rgba(219, 228, 223, 0.14); border-radius: 8px; overflow: hidden; }
+    .admin-network svg { width: 100%; height: 100%; display: block; }
+    .admin-network .road { fill: none; stroke: #c5d1cb; stroke-width: 3.5; stroke-linecap: round; }
+    .admin-network .node circle { fill: #0a7d74; stroke: #f5f7f6; stroke-width: 4; }
+    .admin-network .node.b circle, .admin-network .node.e circle { fill: #d98744; }
+    .admin-network .node text { fill: #ffffff; font: 700 17px Arial, sans-serif; text-anchor: middle; dominant-baseline: middle; }
+    .admin-network .node circle { filter: drop-shadow(0 4px 8px rgba(14, 35, 26, 0.12)); }
+    .admin-network .road.primary { stroke: #c1d1ca; }
+    .interactive-map { background: linear-gradient(#fbfdfb, #f3f8f5); border: 1px solid var(--line); border-radius: 5px; padding: 8px 4px 0; }
+    .road-network-svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .road-network-svg .road { stroke: #b9c9c3; stroke-width: 5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+    .road-network-svg .road.active { stroke: var(--teal); stroke-width: 8; filter: drop-shadow(0 2px 2px rgba(13,117,107,.2)); }
+    .road-network-svg .road.alternative { stroke: var(--orange); stroke-width: 6; }
+    .road-network-svg .node circle { fill: var(--teal); stroke: #fff; stroke-width: 5; vector-effect: non-scaling-stroke; filter: drop-shadow(0 3px 4px rgba(25,45,45,.18)); }
+    .road-network-svg .node text { fill: #fff; font: 700 15px Arial, sans-serif; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+    .road-network-svg .node.active circle { fill: #168879; }
+    .road-network-svg .node.start circle { fill: var(--navy); }
+    .road-network-svg .node.end circle { fill: var(--orange); }
+    .map-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; color: var(--muted); font: 11px Arial, sans-serif; }
+    .map-legend span:before { content: ""; display: inline-block; width: 24px; height: 4px; margin: 0 6px 3px 0; border-radius: 3px; background: #b9c9c3; }
+    .map-legend .recommended:before { background: var(--teal); }
+    .map-legend .alternative:before { background: var(--orange); }
+    .alerts { grid-column: 1 / -1; }.alert-row { display: flex; align-items: center; gap: 13px; padding: 14px 0; border-top: 1px solid var(--line); }.alert-row:first-of-type { border-top: 0; }.alert-icon { width: 30px; height: 30px; display: grid; place-items: center; color: var(--red); background: #fbe9e5; border-radius: 50%; font: 700 16px Arial, sans-serif; }.alert-row strong { font-size: 14px; }.alert-row p { margin: 2px 0 0; color: var(--muted); font: 12px Arial, sans-serif; }
+    .subnav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }.subnav button { border: 0; padding: 8px 12px; color: var(--muted); background: #e9eeea; border-radius: 3px; font: 700 11px Arial, sans-serif; text-transform: uppercase; }.subnav button.active { color: #fff; background: var(--teal); }
+    .monitor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }.camera .video-scene { min-height: 150px; }.camera .video-top { padding: 11px 13px; }.camera .video-scene .car { transform: scale(.55); }.camera .video-scene .car.two { transform: scale(.7); }.camera .camera-data { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 14px; font: 12px Arial, sans-serif; }.camera-data b { display: block; margin-top: 2px; font-size: 16px; }.camera-data span { color: var(--muted); }
+    .user-layout { display: grid; grid-template-columns: 1fr .9fr; gap: 18px; }.journey { padding: 28px; }.journey h2 { margin: 0 0 7px; font-size: 35px; letter-spacing: -.05em; }.journey > p { margin: 0 0 24px; color: var(--muted); font-family: Arial, sans-serif; font-size: 13px; }.route-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; }.field label { display: block; margin-bottom: 6px; color: var(--muted); font: 11px Arial, sans-serif; text-transform: uppercase; letter-spacing: .08em; }.field select { width: 100%; padding: 12px; border: 1px solid var(--line); border-radius: 3px; color: var(--ink); background: #fbfcfa; }.primary { padding: 12px 18px; border: 0; border-radius: 3px; color: #fff; background: var(--teal); font: 700 11px Arial, sans-serif; letter-spacing: .08em; }.primary:hover { background: #095b54; }.user-side { display: grid; gap: 18px; }.traffic-box { padding: 22px; }.traffic-box h3, .route-card h3 { margin: 0 0 16px; font-size: 18px; }.traffic-list { display: grid; gap: 11px; color: var(--muted); font-family: Arial, sans-serif; font-size: 13px; }.traffic-list b { float: right; color: var(--ink); }.route-result { grid-column: 1 / -1; }.route-options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }.route-card { padding: 20px; border-top: 4px solid var(--green); }.route-card.alt { border-color: var(--yellow); }.route-card p { margin: 0 0 8px; color: var(--muted); font: 700 11px Arial, sans-serif; text-transform: uppercase; letter-spacing: .1em; }.route-card strong { display: block; margin-bottom: 14px; font-size: 23px; }.route-card span { display: inline-block; margin-right: 14px; color: var(--muted); font: 12px Arial, sans-serif; }.map-reference { min-height: 250px; padding: 20px; }.map-reference .network-map { max-width: 480px; margin: 0 auto; }.flow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }.flow-card { padding: 20px; }.flow-card h3 { margin: 0 0 15px; font-size: 18px; }.steps { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0; list-style: none; }.steps li { padding: 8px 11px; color: var(--teal); background: var(--teal-soft); border-radius: 3px; font: 700 11px Arial, sans-serif; }.steps li:not(:last-child):after { content: "→"; margin-left: 10px; color: #8da39a; }
+    @media (max-width: 920px) { .admin-grid, .user-layout { grid-template-columns: 1fr; }.metrics { grid-template-columns: repeat(2, 1fr); }.monitor-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 620px) { .app { padding: 16px; }.masthead, .section-heading { align-items: flex-start; flex-direction: column; }.brand h1 { font-size: 21px; }.metrics, .monitor-grid, .route-options, .flow-grid { grid-template-columns: 1fr; }.route-form { grid-template-columns: 1fr; }.primary { width: 100%; }.mode-tabs { overflow-x: auto; }.mode-tab { white-space: nowrap; }.video-scene { min-height: 210px; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="masthead">
+      <div class="brand"><div class="brand-mark">T</div><div><p class="eyebrow">Traffic control</p><h1>AI Traffic Management</h1></div></div>
+      <div class="profile"><span>Operations</span><span class="avatar">AD</span></div>
+    </header>
+    <nav class="mode-tabs" aria-label="Choose dashboard view">
+      <button class="mode-tab active" data-view="admin">Admin view</button>
+      <button class="mode-tab" data-view="user">User view</button>
+      <button class="mode-tab" data-view="flow">User flow &amp; admin flow</button>
+    </nav>
+
+    <main id="admin" class="view active">
+      <div class="section-heading"><div><p class="eyebrow">Admin / Dashboard</p><h2>Traffic overview</h2></div><p>Live traffic monitoring for the city network. All readings below reflect current conditions.</p></div>
+      <div class="admin-grid">
+        <section class="metrics"><article class="card metric"><span>Vehicles</span><strong>89</strong><em>+12% today</em></article><article class="card metric"><span>Average speed</span><strong>22.5</strong><em>km/h</em></article><article class="card metric"><span>Traffic level</span><strong>HIGH</strong><em style="color:var(--red)">Congested</em></article><article class="card metric"><span>Traffic density</span><strong>72%</strong><em style="color:var(--yellow)">Medium-high</em></article></section>
+        <section class="card video"><div class="video-top"><span>Traffic monitoring / Camera 1</span><span class="live">● LIVE</span></div><div class="video-scene"><i class="car one"></i><i class="car two"></i><i class="car three"></i></div></section>
+        <section class="card card-pad trend"><h3 class="card-title">Traffic trend <small>Last 6 hours</small></h3><div class="chart"><svg viewBox="0 0 600 220" preserveAspectRatio="none" aria-label="Sample traffic trend chart"><polyline points="0,170 80,145 160,165 240,105 320,128 400,72 480,92 600,45" fill="none" stroke="#0d756b" stroke-width="4"/><polyline points="0,190 80,182 160,174 240,180 320,145 400,152 480,118 600,130" fill="none" stroke="#df783b" stroke-width="3" stroke-dasharray="7 6"/></svg></div><div class="chart-key"><span class="key">Vehicle count</span><span class="key orange">Average speed</span></div></section>
+        <section class="card card-pad network">
+          <h3 class="card-title">Road network <small>Live</small></h3>
+          <div class="admin-network" aria-label="Road network diagram">
+            <svg viewBox="0 0 720 300" preserveAspectRatio="xMidYMid meet">
+              <g class="roads">
+                <path class="road primary" d="M120 118 L288 92" />
+                <path class="road primary" d="M120 118 L172 214" />
+                <path class="road primary" d="M288 92 L390 96" />
+                <path class="road primary" d="M288 92 L332 194" />
+                <path class="road primary" d="M172 214 L332 194" />
+                <path class="road primary" d="M332 194 L525 156" />
+                <path class="road primary" d="M390 96 L332 194" />
+              </g>
+              <g class="node a"><circle cx="120" cy="118" r="22" /><text x="120" y="118">A</text></g>
+              <g class="node b"><circle cx="288" cy="92" r="22" /><text x="288" y="92">B</text></g>
+              <g class="node c"><circle cx="390" cy="96" r="22" /><text x="390" y="96">C</text></g>
+              <g class="node d"><circle cx="172" cy="214" r="22" /><text x="172" y="214">D</text></g>
+              <g class="node e"><circle cx="332" cy="194" r="22" /><text x="332" y="194">E</text></g>
+              <g class="node f"><circle cx="525" cy="156" r="22" /><text x="525" y="156">F</text></g>
+            </svg>
+          </div>
+        </section>
+        <div class="status" style="grid-column:1/-1">HIGH CONGESTION DETECTED <span style="float:right;font:12px Arial,sans-serif">Road B → C · 52 vehicles · 14 km/h</span></div>
+        <section class="card card-pad alerts"><h3 class="card-title">Active alerts <small>2 incidents</small></h3><div class="alert-row"><span class="alert-icon">!</span><div><strong>High congestion · Road B → C</strong><p>Recommended action: reroute vehicles</p></div></div><div class="alert-row"><span class="alert-icon">!</span><div><strong>Slow traffic · Road D → E</strong><p>Average speed has fallen below 18 km/h</p></div></div></section>
+      </div>
+    </main>
+
+    <main id="user" class="view">
+      <div class="section-heading"><div><p class="eyebrow">User / Home</p><h2>Plan your journey</h2></div><p>Simple route search and current traffic information for everyday travellers.</p></div>
+      <div class="user-layout"><section class="card journey"><h2>Where are you going?</h2><p>Select two locations to preview the route recommendation.</p><form class="route-form" id="routeForm"><div class="field"><label for="source">Source</label><select id="source"><option value="">Select location</option><option>A</option><option>D</option><option>G</option></select></div><div class="field"><label for="destination">Destination</label><select id="destination"><option value="">Select location</option><option>F</option><option>H</option><option>I</option></select></div><button class="primary" type="submit">FIND ROUTE</button></form><div class="status" id="routeNotice" style="display:none;margin-top:22px">Route preview ready. See the recommendation below.</div></section><aside class="user-side"><section class="card traffic-box"><h3>Current traffic</h3><div class="traffic-list"><div>Vehicle count <b id="userVehicles">89</b></div><div>Average speed <b id="userSpeed">22.5 km/h</b></div><div>Traffic level <b id="userTraffic" style="color:var(--red)">HIGH</b></div></div></section><section class="card traffic-box"><h3>Traffic alerts</h3><div class="alert-row"><span class="alert-icon">!</span><div><strong id="userAlert">Heavy congestion detected</strong><p id="userAlertDetail">Consider an alternate route</p></div></div></section></aside><section class="card card-pad route-result"><h3 class="card-title">Route recommendation <small id="routeResultLabel">Select locations</small></h3><div class="route-options"><article class="route-card"><p>Recommended route</p><strong id="recommendedPath">Choose source and destination</strong><span id="recommendedDistance">Distance: --</span><span id="recommendedEta">ETA: --</span><span id="recommendedTraffic" style="color:var(--green)">Traffic: --</span></article><article class="route-card alt"><p>Alternative route</p><strong id="alternativePath">Choose source and destination</strong><span id="alternativeDistance">Distance: --</span><span id="alternativeEta">ETA: --</span><span id="alternativeTraffic" style="color:var(--yellow)">Traffic: --</span></article></div></section><section class="card map-reference"><h3 class="card-title">Map / road network <small id="mapLabel">Select a route to highlight</small></h3><div class="network-map interactive-map" id="userNetwork"><svg class="road-network-svg" viewBox="0 0 700 340" role="img" aria-label="Interactive road network map"><line class="road" data-edge="AB" x1="110" y1="80" x2="285" y2="55"></line><line class="road" data-edge="BC" x1="285" y1="55" x2="560" y2="75"></line><line class="road" data-edge="AD" x1="110" y1="80" x2="125" y2="265"></line><line class="road" data-edge="CE" x1="560" y1="75" x2="365" y2="245"></line><line class="road" data-edge="DE" x1="125" y1="265" x2="365" y2="245"></line><line class="road" data-edge="EF" x1="365" y1="245" x2="570" y2="270"></line><line class="road" data-edge="DG" x1="125" y1="265" x2="285" y2="145"></line><line class="road" data-edge="GH" x1="285" y1="145" x2="475" y2="145"></line><line class="road" data-edge="EH" x1="365" y1="245" x2="475" y2="145"></line><line class="road" data-edge="EI" x1="365" y1="245" x2="650" y2="165"></line><line class="road" data-edge="HI" x1="475" y1="145" x2="650" y2="165"></line><line class="road" data-edge="BE" x1="285" y1="55" x2="365" y2="245"></line><g class="node" data-node="A"><circle cx="110" cy="80" r="22"></circle><text x="110" y="80">A</text></g><g class="node" data-node="B"><circle cx="285" cy="55" r="22"></circle><text x="285" y="55">B</text></g><g class="node" data-node="C"><circle cx="560" cy="75" r="22"></circle><text x="560" y="75">C</text></g><g class="node" data-node="D"><circle cx="125" cy="265" r="22"></circle><text x="125" y="265">D</text></g><g class="node" data-node="E"><circle cx="365" cy="245" r="22"></circle><text x="365" y="245">E</text></g><g class="node" data-node="F"><circle cx="570" cy="270" r="22"></circle><text x="570" y="270">F</text></g><g class="node" data-node="G"><circle cx="285" cy="145" r="22"></circle><text x="285" y="145">G</text></g><g class="node" data-node="H"><circle cx="475" cy="145" r="22"></circle><text x="475" y="145">H</text></g><g class="node" data-node="I"><circle cx="650" cy="165" r="22"></circle><text x="650" y="165">I</text></g></svg><div class="map-legend"><span>Road</span><span class="recommended">Recommended route</span><span class="alternative">Alternative route</span></div></div></section></div>
+    </main>
+
+    <main id="flow" class="view"><div class="section-heading"><div><p class="eyebrow">Navigation</p><h2>System flow</h2></div><p>Traffic flow overview for route planning and operations support.</p></div><div class="flow-grid"><section class="card flow-card"><h3>User flow</h3><ol class="steps"><li>User</li><li>Select source</li><li>Select destination</li><li>Request route</li><li>Traffic analysis</li><li>Recommended route</li><li>Alternative route</li><li>ETA</li></ol></section><section class="card flow-card"><h3>Admin flow</h3><ol class="steps"><li>Admin</li><li>Dashboard</li><li>Monitor traffic</li><li>View congestion</li><li>Road network</li><li>Alerts</li><li>Reports</li></ol></section></div><section class="card card-pad" style="margin-top:18px"><h3 class="card-title">Admin navigation map <small>Overview</small></h3><div class="subnav"><button class="active">Dashboard</button><button>Traffic monitoring</button><button>Road network</button><button>Route management</button><button>Alerts</button><button>Reports</button></div><div class="monitor-grid"><article class="card card-pad"><h3 class="card-title">Traffic monitoring <small>3 cameras</small></h3><p style="color:var(--muted);font-family:Arial,sans-serif;font-size:13px">Camera 1 · Camera 2 · Camera 3<br>Live video · Vehicle count · Average speed · Traffic condition</p></article><article class="card card-pad"><h3 class="card-title">Route management <small>Live</small></h3><p style="color:var(--muted);font-family:Arial,sans-serif;font-size:13px">Source: A<br>Destination: F<br><b style="color:var(--ink)">Recommended: A → B → C → E → F</b><br>ETA: 8.2 minutes</p></article><article class="card card-pad"><h3 class="card-title">Reports <small>Live</small></h3><p style="color:var(--muted);font-family:Arial,sans-serif;font-size:13px">Daily vehicle count · Average speed · Traffic conditions · Congestion frequency · Route changes</p></article></div></section></main>
+  </div>
+  <script>
+    const tabs = document.querySelectorAll('.mode-tab');
+    const views = document.querySelectorAll('.view');
+    tabs.forEach(tab => tab.addEventListener('click', () => {
+      tabs.forEach(item => item.classList.remove('active'));
+      views.forEach(view => view.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.view).classList.add('active');
+    }));
+    const routeOptions = {
+      'A-F': { recommended: ['A', 'B', 'E', 'F'], alternative: ['A', 'D', 'E', 'F'], distance: ['4.6 km', '5.2 km'], eta: ['8.2 min', '10.1 min'], traffic: ['LOW', 'MEDIUM'], vehicles: '89', speed: '22.5 km/h', alert: 'Heavy congestion detected', detail: 'Consider an alternate route' },
+      'A-H': { recommended: ['A', 'B', 'C', 'E', 'H'], alternative: ['A', 'D', 'E', 'H'], distance: ['5.4 km', '6.1 km'], eta: ['9.4 min', '11.6 min'], traffic: ['LOW', 'MEDIUM'], vehicles: '76', speed: '27.1 km/h', alert: 'Traffic is moving normally', detail: 'Recommended route has the clearest flow' },
+      'A-I': { recommended: ['A', 'B', 'C', 'E', 'I'], alternative: ['A', 'D', 'E', 'I'], distance: ['6.2 km', '6.8 km'], eta: ['11.2 min', '13.5 min'], traffic: ['MEDIUM', 'HIGH'], vehicles: '108', speed: '18.4 km/h', alert: 'Congestion near destination', detail: 'Allow extra travel time' },
+      'D-F': { recommended: ['D', 'E', 'F'], alternative: ['D', 'A', 'B', 'E', 'F'], distance: ['3.2 km', '5.8 km'], eta: ['6.4 min', '11.3 min'], traffic: ['LOW', 'MEDIUM'], vehicles: '52', speed: '31.7 km/h', alert: 'Clear route available', detail: 'No active incidents on the recommended path' },
+      'D-H': { recommended: ['D', 'E', 'H'], alternative: ['D', 'A', 'B', 'C', 'H'], distance: ['3.8 km', '6.6 km'], eta: ['7.5 min', '12.8 min'], traffic: ['MEDIUM', 'HIGH'], vehicles: '94', speed: '20.2 km/h', alert: 'Slow traffic on Road D → E', detail: 'The recommended route remains quickest' },
+      'D-I': { recommended: ['D', 'E', 'I'], alternative: ['D', 'A', 'B', 'C', 'I'], distance: ['4.7 km', '7.1 km'], eta: ['8.9 min', '14.4 min'], traffic: ['MEDIUM', 'HIGH'], vehicles: '87', speed: '21.6 km/h', alert: 'Moderate congestion detected', detail: 'Compare both routes before travelling' },
+      'G-F': { recommended: ['G', 'H', 'E', 'F'], alternative: ['G', 'D', 'E', 'F'], distance: ['4.1 km', '4.8 km'], eta: ['7.8 min', '9.6 min'], traffic: ['LOW', 'MEDIUM'], vehicles: '61', speed: '29.3 km/h', alert: 'Clear route available', detail: 'Traffic is light along the recommendation' },
+      'G-H': { recommended: ['G', 'H'], alternative: ['G', 'D', 'E', 'H'], distance: ['1.8 km', '4.2 km'], eta: ['4.1 min', '8.5 min'], traffic: ['LOW', 'MEDIUM'], vehicles: '44', speed: '34.8 km/h', alert: 'Traffic is moving normally', detail: 'Shortest route selected' },
+      'G-I': { recommended: ['G', 'H', 'I'], alternative: ['G', 'D', 'E', 'I'], distance: ['2.9 km', '4.9 km'], eta: ['5.6 min', '9.8 min'], traffic: ['LOW', 'MEDIUM'], vehicles: '58', speed: '30.5 km/h', alert: 'Clear route available', detail: 'No active incidents on the recommended path' }
+    };
+    const edgeFor = (from, to) => [from + to, to + from].find(edge => ['AB', 'BC', 'AD', 'CE', 'DE', 'EF', 'DG', 'GH', 'EH', 'EI', 'HI', 'BE'].includes(edge));
+    const updateRoute = () => {
+      const source = document.getElementById('source').value;
+      const destination = document.getElementById('destination').value;
+      const route = routeOptions[`${source}-${destination}`];
+      if (!route) return;
+      const userNetwork = document.getElementById('userNetwork');
+      if (!userNetwork) return;
+
+      const fields = { recommendedPath: route.recommended.join(' → '), alternativePath: route.alternative.join(' → '), recommendedDistance: `Distance: ${route.distance[0]}`, alternativeDistance: `Distance: ${route.distance[1]}`, recommendedEta: `ETA: ${route.eta[0]}`, alternativeEta: `ETA: ${route.eta[1]}`, recommendedTraffic: `Traffic: ${route.traffic[0]}`, alternativeTraffic: `Traffic: ${route.traffic[1]}`, userVehicles: route.vehicles, userSpeed: route.speed, userTraffic: route.traffic[0], userAlert: route.alert, userAlertDetail: route.detail, routeResultLabel: `${source} → ${destination}`, mapLabel: `${source} → ${destination} highlighted` };
+      Object.entries(fields).forEach(([id, text]) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = text;
+      });
+
+      const trafficEl = document.getElementById('userTraffic');
+      if (trafficEl) {
+        trafficEl.style.color = route.traffic[0] === 'LOW' ? 'var(--green)' : route.traffic[0] === 'MEDIUM' ? 'var(--yellow)' : 'var(--red)';
+      }
+
+      const noticeEl = document.getElementById('routeNotice');
+      if (noticeEl) noticeEl.style.display = 'block';
+
+      userNetwork.querySelectorAll('.road, .node').forEach(item => item.classList.remove('active', 'alternative', 'start', 'end'));
+
+      route.recommended.slice(0, -1).forEach((node, index) => {
+        const edge = edgeFor(node, route.recommended[index + 1]);
+        if (!edge) return;
+        const edgeEl = userNetwork.querySelector(`[data-edge="${edge}"]`);
+        if (edgeEl) edgeEl.classList.add('active');
+      });
+
+      route.alternative.slice(0, -1).forEach((node, index) => {
+        const edge = edgeFor(node, route.alternative[index + 1]);
+        if (!edge) return;
+        const edgeEl = userNetwork.querySelector(`[data-edge="${edge}"]`);
+        if (edgeEl) edgeEl.classList.add('alternative');
+      });
+
+      [...new Set([...route.recommended, ...route.alternative])].forEach(node => {
+        const nodeEl = userNetwork.querySelector(`[data-node="${node}"]`);
+        if (nodeEl) nodeEl.classList.add('active');
+      });
+
+      const sourceEl = userNetwork.querySelector(`[data-node="${source}"]`);
+      const destinationEl = userNetwork.querySelector(`[data-node="${destination}"]`);
+      if (sourceEl) sourceEl.classList.add('start');
+      if (destinationEl) destinationEl.classList.add('end');
+    };
+    document.getElementById('routeForm').addEventListener('submit', event => { event.preventDefault(); updateRoute(); });
+    document.getElementById('source').addEventListener('change', updateRoute);
+    document.getElementById('destination').addEventListener('change', updateRoute);
+  </script>
+</body>
+</html>
