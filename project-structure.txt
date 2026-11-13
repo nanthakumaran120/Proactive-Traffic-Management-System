@@ -1,0 +1,93 @@
+Folder PATH listing for volume OS
+Volume serial number is 44A4-258C
+C:.
+|   .gitignore
+|   AI_Powered_Proactive_Traffic_Management_and_Intelligent_Route_Recommendation_System__1_.pdf
+|   cv_traffic_history.csv
+|   cv_traffic_output.csv
+|   cv_traffic_pipeline.ipynb
+|   eg-yolo-detection.ipynb
+|   ember1_validation (1).py
+|   IoT_ML_training.ipynb
+|   mob_ML_training.ipynb
+|   pdf_text_extracted.txt
+|   project-structure.txt
+|   README.md
+|   show_vehicle.ipynb
+|   show_vehicle_demo.ipynb
+|   traffic.png
+|   trafficima.jpg
+|   Trafficvedio.mp4
+|   traffic_integration_data_cleaned.csv.xls
+|   Untitled.ipynb
+|   vehicle_classes.pkl
+|   vehicle_monitoring_browser.mp4
+|   vehicle_monitoring_h264.mp4
+|   vehicle_monitoring_output.mp4
+|   vehicle_positions.pkl
+|   vehicle_speed_data.pkl
+|   vehicle_speed_estimation.ipynb
+|   vehicle_speed_initial.ipynb
+|   vehicle_speed_results.csv
+|   webcam_vehicle_demo.ipynb
+|   Ylo-integration.ipynb
+|   yolov8n.pt
+|   yolo_traffic_detection.jpg
+|   yolo_traffic_output.csv
+|   
++---.ipynb_checkpoints
+|       cv_traffic_pipeline-checkpoint.ipynb
+|       eg-yolo-detection-checkpoint.ipynb
+|       IoT_ML_training-checkpoint.ipynb
+|       mob_ML_training-checkpoint.ipynb
+|       show_vehicle-checkpoint.ipynb
+|       show_vehicle_demo-checkpoint.ipynb
+|       Untitled-checkpoint.ipynb
+|       vehicle_monitoring_output-checkpoint.mp4
+|       vehicle_speed_estimation-checkpoint.ipynb
+|       vehicle_speed_initial-checkpoint.ipynb
+|       webcam_vehicle_demo-checkpoint.ipynb
+|       Ylo-integration-checkpoint.ipynb
+|       
++---.vscode
+|       settings.json
+|       
++---cleaned_data
+|   |   IoT_cleaned.csv
+|   |   label_encoder.pkl
+|   |   mobility_cleaned.csv
+|   |   model_features.pkl
+|   |   traffic_cleaned.csv
+|   |   traffic_mgmt_cleaned.csv
+|   |   traffic_prediction_model.pkl
+|   |   
+|   \---.ipynb_checkpoints
+|           IoT_cleaned-checkpoint.csv
+|           mobility_cleaned-checkpoint.csv
+|           
++---datasets
+|   |   IoT.csv
+|   |   mobility.csv
+|   |   traffic.csv
+|   |   traffic_mgmt.csv
+|   |   Untitled.ipynb
+|   |   
+|   \---.ipynb_checkpoints
+|           IOT-checkpoint.csv
+|           mobility-checkpoint.csv
+|           traffic-checkpoint.csv
+|           traffic_mgmt-checkpoint.csv
+|           Untitled-checkpoint.ipynb
+|           
+\---Notebook
+    |   Untitled.ipynb
+    |   Untitled1.ipynb
+    |   Untitled2.ipynb
+    |   Untitled3.ipynb
+    |   
+    \---.ipynb_checkpoints
+            Untitled-checkpoint.ipynb
+            Untitled1-checkpoint.ipynb
+            Untitled2-checkpoint.ipynb
+            Untitled3-checkpoint.ipynb
+            

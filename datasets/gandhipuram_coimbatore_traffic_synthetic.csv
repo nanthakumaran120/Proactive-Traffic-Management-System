@@ -1,0 +1,241 @@
+﻿Timestamp,Location,Latitude,Longitude,Vehicle_Count,Traffic_Speed_kmh,Road_Occupancy_pct,Traffic_Light_State,Weather_Condition,Accident_Report,Traffic_Condition
+12-10-2026 07:30,100 Feet Road Junction,11.018996,76.971266,74,15.22,56.53,Red,Cloudy,No,High
+12-10-2026 07:30,Avarampalayam Road Approach,11.023935,76.967931,49,14.63,42.11,Red,Clear,No,High
+12-10-2026 07:30,Cross Cut Road,11.020234,76.966098,72,22.79,51.72,Green,Clear,No,Medium
+12-10-2026 07:30,Dr Nanjappa Road,11.015754,76.966566,72,13.3,52.88,Red,Cloudy,No,High
+12-10-2026 07:30,Gandhipuram Bus Stand Approach,11.017812,76.967603,77,15.99,69.14,Red,Clear,No,High
+12-10-2026 07:30,Sathy Road Junction,11.021115,76.969885,75,15.06,58.39,Green,Cloudy,No,High
+12-10-2026 08:30,100 Feet Road Junction,11.018978,76.971243,74,12.67,67.48,Red,Cloudy,No,High
+12-10-2026 08:30,Avarampalayam Road Approach,11.023972,76.967993,70,14.5,52.88,Red,Light Rain,No,High
+12-10-2026 08:30,Cross Cut Road,11.02025,76.966064,57,16.46,46.03,Red,Clear,No,High
+12-10-2026 08:30,Dr Nanjappa Road,11.015299,76.966512,63,8.24,52.85,Yellow,Clear,No,High
+12-10-2026 08:30,Gandhipuram Bus Stand Approach,11.017562,76.96722,76,13.09,56.93,Red,Clear,No,High
+12-10-2026 08:30,Sathy Road Junction,11.021559,76.970524,80,10.48,63.39,Green,Cloudy,No,High
+12-10-2026 10:30,100 Feet Road Junction,11.018899,76.971171,52,19.54,50.76,Green,Cloudy,No,Medium
+12-10-2026 10:30,Avarampalayam Road Approach,11.023956,76.96814,30,35.19,17.18,Red,Cloudy,No,Low
+12-10-2026 10:30,Cross Cut Road,11.020106,76.965913,60,25.43,41.35,Yellow,Clear,No,Medium
+12-10-2026 10:30,Dr Nanjappa Road,11.015442,76.966583,44,21.36,27.59,Green,Clear,No,Medium
+12-10-2026 10:30,Gandhipuram Bus Stand Approach,11.017877,76.967676,59,18.32,40.67,Red,Light Rain,No,Medium
+12-10-2026 10:30,Sathy Road Junction,11.021653,76.970338,62,26.46,47.8,Red,Clear,No,Medium
+12-10-2026 12:30,100 Feet Road Junction,11.019067,76.971282,55,24.81,48.41,Green,Cloudy,No,Medium
+12-10-2026 12:30,Avarampalayam Road Approach,11.024208,76.96811,38,23.47,21.96,Red,Cloudy,No,Medium
+12-10-2026 12:30,Cross Cut Road,11.020153,76.965933,43,27.36,31.1,Green,Cloudy,No,Medium
+12-10-2026 12:30,Dr Nanjappa Road,11.015928,76.966732,61,27.02,42.15,Green,Cloudy,No,Medium
+12-10-2026 12:30,Gandhipuram Bus Stand Approach,11.01781,76.9674,61,23.13,39.67,Green,Clear,No,Medium
+12-10-2026 12:30,Sathy Road Junction,11.021412,76.970079,50,31.92,26.24,Green,Clear,No,Medium
+12-10-2026 15:30,100 Feet Road Junction,11.018766,76.971052,64,24.34,48.32,Green,Clear,No,Medium
+12-10-2026 15:30,Avarampalayam Road Approach,11.023734,76.96784,27,20.8,34.24,Red,Light Rain,No,Medium
+12-10-2026 15:30,Cross Cut Road,11.020119,76.966236,57,25.28,44.1,Red,Cloudy,No,Medium
+12-10-2026 15:30,Dr Nanjappa Road,11.015241,76.966367,55,26.87,35.16,Red,Clear,No,Medium
+12-10-2026 15:30,Gandhipuram Bus Stand Approach,11.017697,76.967546,49,26.33,34.87,Red,Clear,No,Medium
+12-10-2026 15:30,Sathy Road Junction,11.021326,76.970025,43,20.13,30.72,Red,Clear,No,Medium
+12-10-2026 17:30,100 Feet Road Junction,11.019274,76.971212,87,6,76.9,Red,Light Rain,No,High
+12-10-2026 17:30,Avarampalayam Road Approach,11.024078,76.967899,66,7.5,47.9,Green,Cloudy,No,High
+12-10-2026 17:30,Cross Cut Road,11.020449,76.966199,83,7.5,62.09,Green,Cloudy,No,High
+12-10-2026 17:30,Dr Nanjappa Road,11.015682,76.966544,77,7.58,56.05,Red,Clear,No,High
+12-10-2026 17:30,Gandhipuram Bus Stand Approach,11.017607,76.967282,93,12.24,63.86,Red,Clear,No,High
+12-10-2026 17:30,Sathy Road Junction,11.021458,76.970016,84,7.5,63.71,Green,Cloudy,No,High
+12-10-2026 18:30,100 Feet Road Junction,11.019015,76.971103,92,7.5,74.35,Yellow,Cloudy,No,High
+12-10-2026 18:30,Avarampalayam Road Approach,11.023769,76.967924,63,12.17,61.64,Red,Clear,No,High
+12-10-2026 18:30,Cross Cut Road,11.020219,76.966069,71,7.5,56.97,Red,Cloudy,No,High
+12-10-2026 18:30,Dr Nanjappa Road,11.015166,76.966392,85,5,73.41,Red,Clear,Yes,High
+12-10-2026 18:30,Gandhipuram Bus Stand Approach,11.01764,76.96764,82,7.5,72.5,Green,Clear,No,High
+12-10-2026 18:30,Sathy Road Junction,11.021062,76.970162,91,9.36,77.82,Green,Light Rain,No,High
+12-10-2026 20:00,100 Feet Road Junction,11.018948,76.971088,42,26.23,28.77,Red,Cloudy,No,Medium
+12-10-2026 20:00,Avarampalayam Road Approach,11.024147,76.968113,23,34.75,23.52,Green,Clear,No,Low
+12-10-2026 20:00,Cross Cut Road,11.020066,76.9658,42,29.11,37.01,Red,Clear,No,Low
+12-10-2026 20:00,Dr Nanjappa Road,11.015309,76.966687,46,27.62,30.46,Yellow,Clear,No,Medium
+12-10-2026 20:00,Gandhipuram Bus Stand Approach,11.017497,76.967497,50,31.2,22.37,Red,Clear,No,Medium
+12-10-2026 20:00,Sathy Road Junction,11.0215,76.969801,53,21.46,43.12,Green,Light Rain,No,Medium
+13-10-2026 07:30,100 Feet Road Junction,11.01886,76.971317,58,13.26,46.27,Green,Clear,No,High
+13-10-2026 07:30,Avarampalayam Road Approach,11.024015,76.9679,77,11.84,59.32,Red,Cloudy,No,High
+13-10-2026 07:30,Cross Cut Road,11.019689,76.965731,71,12.06,51.54,Yellow,Clear,No,High
+13-10-2026 07:30,Dr Nanjappa Road,11.015417,76.966969,54,10.94,56.53,Red,Cloudy,Yes,High
+13-10-2026 07:30,Gandhipuram Bus Stand Approach,11.017651,76.967259,84,10.98,66.81,Green,Cloudy,No,High
+13-10-2026 07:30,Sathy Road Junction,11.02134,76.970145,80,15.88,59.84,Yellow,Clear,No,High
+13-10-2026 08:30,100 Feet Road Junction,11.019079,76.971391,77,14.5,58.01,Green,Cloudy,No,High
+13-10-2026 08:30,Avarampalayam Road Approach,11.024164,76.968006,72,21.09,55.19,Green,Clear,No,Medium
+13-10-2026 08:30,Cross Cut Road,11.020064,76.965896,74,11.78,51.42,Red,Clear,No,High
+13-10-2026 08:30,Dr Nanjappa Road,11.015931,76.96654,65,20.3,36.21,Red,Cloudy,No,Medium
+13-10-2026 08:30,Gandhipuram Bus Stand Approach,11.018124,76.967561,82,17.08,65.88,Green,Light Rain,No,High
+13-10-2026 08:30,Sathy Road Junction,11.020865,76.970005,77,11.62,63.48,Red,Clear,No,High
+13-10-2026 10:30,100 Feet Road Junction,11.0187,76.970989,54,22.04,38.07,Green,Light Rain,No,Medium
+13-10-2026 10:30,Avarampalayam Road Approach,11.023984,76.968169,57,25.87,40.8,Green,Clear,No,Medium
+13-10-2026 10:30,Cross Cut Road,11.019978,76.965845,47,30.77,28.76,Red,Clear,No,Low
+13-10-2026 10:30,Dr Nanjappa Road,11.015497,76.96657,50,28.66,43.44,Green,Cloudy,No,Medium
+13-10-2026 10:30,Gandhipuram Bus Stand Approach,11.017558,76.967327,62,24.92,47.88,Red,Clear,No,Medium
+13-10-2026 10:30,Sathy Road Junction,11.021065,76.970071,53,25.21,45.69,Green,Cloudy,No,Medium
+13-10-2026 12:30,100 Feet Road Junction,11.018654,76.971154,47,30.35,33.3,Red,Cloudy,No,Low
+13-10-2026 12:30,Avarampalayam Road Approach,11.024057,76.968074,43,30.84,31.88,Green,Cloudy,No,Low
+13-10-2026 12:30,Cross Cut Road,11.02018,76.966083,52,26.22,31.28,Green,Cloudy,No,Medium
+13-10-2026 12:30,Dr Nanjappa Road,11.015533,76.966736,56,25.81,37.28,Red,Clear,No,Medium
+13-10-2026 12:30,Gandhipuram Bus Stand Approach,11.017881,76.967486,66,26.31,51.17,Green,Clear,No,Medium
+13-10-2026 12:30,Sathy Road Junction,11.021437,76.96998,51,28.25,36.93,Yellow,Clear,No,Medium
+13-10-2026 15:30,100 Feet Road Junction,11.018979,76.970976,58,27.37,33.99,Yellow,Clear,No,Medium
+13-10-2026 15:30,Avarampalayam Road Approach,11.024126,76.967756,45,30.26,41.28,Red,Cloudy,No,Low
+13-10-2026 15:30,Cross Cut Road,11.020304,76.965884,51,34.17,28.52,Red,Clear,No,Medium
+13-10-2026 15:30,Dr Nanjappa Road,11.015602,76.966743,59,23.87,44.24,Red,Clear,No,Medium
+13-10-2026 15:30,Gandhipuram Bus Stand Approach,11.0178,76.967578,53,22.16,36.56,Red,Clear,No,Medium
+13-10-2026 15:30,Sathy Road Junction,11.021706,76.969894,53,25.93,49.69,Red,Clear,No,Medium
+13-10-2026 17:30,100 Feet Road Junction,11.019149,76.97117,82,7.5,67.13,Red,Cloudy,No,High
+13-10-2026 17:30,Avarampalayam Road Approach,11.023975,76.968276,72,10.73,47.28,Red,Cloudy,No,High
+13-10-2026 17:30,Cross Cut Road,11.020031,76.966183,84,7.5,65.67,Yellow,Cloudy,No,High
+13-10-2026 17:30,Dr Nanjappa Road,11.015312,76.966463,61,7.5,61.71,Green,Cloudy,No,High
+13-10-2026 17:30,Gandhipuram Bus Stand Approach,11.017622,76.967481,93,9.56,76.01,Yellow,Cloudy,No,High
+13-10-2026 17:30,Sathy Road Junction,11.021135,76.969954,91,9.37,73.36,Yellow,Cloudy,No,High
+13-10-2026 18:30,100 Feet Road Junction,11.018495,76.970985,78,7.5,76.05,Red,Clear,No,High
+13-10-2026 18:30,Avarampalayam Road Approach,11.024292,76.968065,67,6,52.05,Green,Light Rain,No,High
+13-10-2026 18:30,Cross Cut Road,11.020116,76.966059,84,9.41,72.36,Green,Light Rain,No,High
+13-10-2026 18:30,Dr Nanjappa Road,11.015618,76.966743,70,15.43,45.18,Red,Cloudy,No,High
+13-10-2026 18:30,Gandhipuram Bus Stand Approach,11.017782,76.967283,89,8.63,81.67,Green,Cloudy,No,High
+13-10-2026 18:30,Sathy Road Junction,11.020875,76.969969,84,9.08,69.08,Red,Clear,No,High
+13-10-2026 20:00,100 Feet Road Junction,11.018453,76.971021,36,35.16,13.14,Green,Cloudy,No,Low
+13-10-2026 20:00,Avarampalayam Road Approach,11.023932,76.968165,37,33.59,17.79,Green,Clear,No,Low
+13-10-2026 20:00,Cross Cut Road,11.020314,76.965863,35,28.64,28.13,Red,Cloudy,No,Medium
+13-10-2026 20:00,Dr Nanjappa Road,11.015468,76.966765,53,31.81,49.54,Yellow,Cloudy,No,Medium
+13-10-2026 20:00,Gandhipuram Bus Stand Approach,11.017721,76.967329,53,22.49,22.7,Green,Clear,No,Medium
+13-10-2026 20:00,Sathy Road Junction,11.021249,76.970074,44,25.14,30.98,Yellow,Clear,No,Medium
+14-10-2026 07:30,100 Feet Road Junction,11.018779,76.971466,85,18.38,46.1,Green,Clear,No,High
+14-10-2026 07:30,Avarampalayam Road Approach,11.024419,76.968273,63,14.93,32.47,Yellow,Clear,No,High
+14-10-2026 07:30,Cross Cut Road,11.019995,76.966125,67,9.62,58.24,Yellow,Clear,No,High
+14-10-2026 07:30,Dr Nanjappa Road,11.015444,76.966306,63,17.64,55.33,Red,Cloudy,No,High
+14-10-2026 07:30,Gandhipuram Bus Stand Approach,11.0179,76.967432,75,11.61,62.39,Red,Light Rain,No,High
+14-10-2026 07:30,Sathy Road Junction,11.021375,76.970005,82,13.79,64.51,Red,Cloudy,No,High
+14-10-2026 08:30,100 Feet Road Junction,11.018866,76.971171,74,18.59,54.87,Yellow,Cloudy,No,Medium
+14-10-2026 08:30,Avarampalayam Road Approach,11.024177,76.96779,50,7.81,36.67,Yellow,Light Rain,No,High
+14-10-2026 08:30,Cross Cut Road,11.020159,76.966032,72,12.4,70.76,Yellow,Clear,No,High
+14-10-2026 08:30,Dr Nanjappa Road,11.015471,76.966836,67,8.89,48.14,Green,Clear,No,High
+14-10-2026 08:30,Gandhipuram Bus Stand Approach,11.017973,76.96727,76,12.78,63.9,Red,Cloudy,No,High
+14-10-2026 08:30,Sathy Road Junction,11.021439,76.970059,74,12.43,52.19,Yellow,Clear,No,High
+14-10-2026 10:30,100 Feet Road Junction,11.018753,76.970994,45,23.88,31.85,Red,Cloudy,No,Medium
+14-10-2026 10:30,Avarampalayam Road Approach,11.024058,76.967863,51,24.91,33.11,Green,Clear,No,Medium
+14-10-2026 10:30,Cross Cut Road,11.020105,76.966185,43,22.21,32.5,Yellow,Clear,No,Medium
+14-10-2026 10:30,Dr Nanjappa Road,11.015544,76.966844,45,27.19,36.23,Red,Clear,No,Medium
+14-10-2026 10:30,Gandhipuram Bus Stand Approach,11.017899,76.967471,66,20.17,52.49,Green,Light Rain,No,Medium
+14-10-2026 10:30,Sathy Road Junction,11.02095,76.969746,48,30.46,30.84,Green,Cloudy,No,Medium
+14-10-2026 12:30,100 Feet Road Junction,11.019111,76.971168,52,26.13,31.66,Red,Cloudy,No,Medium
+14-10-2026 12:30,Avarampalayam Road Approach,11.023581,76.968043,32,25.71,18.3,Red,Clear,No,Medium
+14-10-2026 12:30,Cross Cut Road,11.019902,76.965982,45,30.51,35.62,Yellow,Cloudy,No,Low
+14-10-2026 12:30,Dr Nanjappa Road,11.015757,76.966504,48,24.39,29.18,Red,Cloudy,No,Medium
+14-10-2026 12:30,Gandhipuram Bus Stand Approach,11.017851,76.967595,63,21.58,59.38,Green,Light Rain,No,Medium
+14-10-2026 12:30,Sathy Road Junction,11.020909,76.970178,74,20.2,52.95,Green,Cloudy,No,Medium
+14-10-2026 15:30,100 Feet Road Junction,11.01864,76.971107,46,32.49,40.17,Red,Clear,No,Low
+14-10-2026 15:30,Avarampalayam Road Approach,11.024183,76.967701,43,31.06,37.58,Yellow,Clear,No,Low
+14-10-2026 15:30,Cross Cut Road,11.020156,76.965911,50,23.93,36.94,Green,Clear,No,Medium
+14-10-2026 15:30,Dr Nanjappa Road,11.015653,76.966358,39,26.17,23.44,Yellow,Clear,No,Medium
+14-10-2026 15:30,Gandhipuram Bus Stand Approach,11.017559,76.967589,68,18.73,62.82,Red,Light Rain,No,Medium
+14-10-2026 15:30,Sathy Road Junction,11.02106,76.969887,59,21.3,43.99,Green,Cloudy,No,Medium
+14-10-2026 17:30,100 Feet Road Junction,11.019068,76.971287,78,8.46,58.56,Red,Cloudy,No,High
+14-10-2026 17:30,Avarampalayam Road Approach,11.023785,76.967808,71,13.98,49.12,Green,Clear,No,High
+14-10-2026 17:30,Cross Cut Road,11.02011,76.965799,65,11.17,64.41,Red,Clear,No,High
+14-10-2026 17:30,Dr Nanjappa Road,11.015349,76.966718,66,12.04,48.18,Green,Cloudy,No,High
+14-10-2026 17:30,Gandhipuram Bus Stand Approach,11.017726,76.967417,91,7.5,62.74,Red,Clear,No,High
+14-10-2026 17:30,Sathy Road Junction,11.020833,76.970006,93,7.5,73.1,Red,Clear,No,High
+14-10-2026 18:30,100 Feet Road Junction,11.019093,76.971309,94,7.5,65.09,Green,Clear,No,High
+14-10-2026 18:30,Avarampalayam Road Approach,11.023784,76.967948,56,7.86,39.69,Red,Clear,No,High
+14-10-2026 18:30,Cross Cut Road,11.019551,76.965889,79,7.5,59.12,Red,Cloudy,No,High
+14-10-2026 18:30,Dr Nanjappa Road,11.015208,76.966532,67,13.6,48.24,Green,Cloudy,No,High
+14-10-2026 18:30,Gandhipuram Bus Stand Approach,11.017836,76.967119,84,13.89,70.49,Green,Clear,No,High
+14-10-2026 18:30,Sathy Road Junction,11.021332,76.969691,88,7.5,66.53,Red,Cloudy,No,High
+14-10-2026 20:00,100 Feet Road Junction,11.018848,76.971236,49,31.42,30.84,Green,Clear,No,Medium
+14-10-2026 20:00,Avarampalayam Road Approach,11.023821,76.968119,37,34.46,20.48,Red,Clear,No,Low
+14-10-2026 20:00,Cross Cut Road,11.01998,76.966078,34,24.85,30.91,Red,Light Rain,No,Medium
+14-10-2026 20:00,Dr Nanjappa Road,11.015511,76.966719,40,30.69,27.88,Red,Light Rain,No,Low
+14-10-2026 20:00,Gandhipuram Bus Stand Approach,11.017745,76.967419,46,28.18,29.56,Red,Clear,No,Medium
+14-10-2026 20:00,Sathy Road Junction,11.021229,76.969995,42,33.8,33.46,Red,Clear,No,Low
+15-10-2026 07:30,100 Feet Road Junction,11.018894,76.97121,93,5,72.96,Red,Clear,Yes,High
+15-10-2026 07:30,Avarampalayam Road Approach,11.023932,76.968058,65,13.35,49.19,Green,Clear,No,High
+15-10-2026 07:30,Cross Cut Road,11.020135,76.966113,52,19.06,42.74,Red,Clear,No,Medium
+15-10-2026 07:30,Dr Nanjappa Road,11.015639,76.966739,68,12.01,57.54,Green,Clear,No,High
+15-10-2026 07:30,Gandhipuram Bus Stand Approach,11.017603,76.96714,83,9.26,69.24,Green,Clear,No,High
+15-10-2026 07:30,Sathy Road Junction,11.02115,76.969908,83,14.26,65.24,Red,Clear,No,High
+15-10-2026 08:30,100 Feet Road Junction,11.018806,76.97103,75,14.46,60.79,Red,Clear,No,High
+15-10-2026 08:30,Avarampalayam Road Approach,11.024002,76.967982,66,14.11,53.69,Yellow,Clear,No,High
+15-10-2026 08:30,Cross Cut Road,11.02016,76.966009,78,16.6,64.46,Red,Clear,No,High
+15-10-2026 08:30,Dr Nanjappa Road,11.015616,76.966709,65,11.92,53.26,Green,Clear,No,High
+15-10-2026 08:30,Gandhipuram Bus Stand Approach,11.01763,76.967569,74,15.24,63.1,Red,Cloudy,No,High
+15-10-2026 08:30,Sathy Road Junction,11.021562,76.970099,83,15.72,61.21,Red,Clear,No,High
+15-10-2026 10:30,100 Feet Road Junction,11.018615,76.971066,58,18.14,32.87,Green,Light Rain,No,Medium
+15-10-2026 10:30,Avarampalayam Road Approach,11.023503,76.967922,55,29.94,32.59,Green,Cloudy,No,Medium
+15-10-2026 10:30,Cross Cut Road,11.019672,76.965859,57,21.84,35.73,Yellow,Clear,No,Medium
+15-10-2026 10:30,Dr Nanjappa Road,11.015775,76.966316,52,24.96,18.49,Green,Cloudy,No,Medium
+15-10-2026 10:30,Gandhipuram Bus Stand Approach,11.017887,76.967206,49,24.91,37.24,Red,Cloudy,No,Medium
+15-10-2026 10:30,Sathy Road Junction,11.021223,76.969449,58,25.82,47.41,Red,Clear,No,Medium
+15-10-2026 12:30,100 Feet Road Junction,11.018947,76.971194,66,28.1,43.75,Green,Clear,No,Medium
+15-10-2026 12:30,Avarampalayam Road Approach,11.024202,76.967992,46,25.83,34.58,Red,Cloudy,No,Medium
+15-10-2026 12:30,Cross Cut Road,11.020068,76.965875,49,35.56,38.13,Green,Cloudy,No,Medium
+15-10-2026 12:30,Dr Nanjappa Road,11.015536,76.966161,50,34.89,40.47,Yellow,Clear,No,Medium
+15-10-2026 12:30,Gandhipuram Bus Stand Approach,11.018202,76.967351,60,27.98,52.43,Green,Light Rain,No,Medium
+15-10-2026 12:30,Sathy Road Junction,11.021483,76.96982,70,25.19,53.45,Red,Cloudy,No,Medium
+15-10-2026 15:30,100 Feet Road Junction,11.018766,76.971086,44,26.3,35.44,Red,Cloudy,No,Medium
+15-10-2026 15:30,Avarampalayam Road Approach,11.024059,76.968105,34,26.74,20.18,Green,Clear,No,Medium
+15-10-2026 15:30,Cross Cut Road,11.019826,76.966185,43,18.35,38.13,Green,Clear,No,Medium
+15-10-2026 15:30,Dr Nanjappa Road,11.015268,76.966255,67,19.16,40.07,Green,Light Rain,No,Medium
+15-10-2026 15:30,Gandhipuram Bus Stand Approach,11.017851,76.967274,53,19.97,36.01,Red,Clear,No,Medium
+15-10-2026 15:30,Sathy Road Junction,11.021025,76.970133,53,24.36,32.85,Red,Clear,No,Medium
+15-10-2026 17:30,100 Feet Road Junction,11.019,76.971245,90,8.85,68.49,Green,Clear,No,High
+15-10-2026 17:30,Avarampalayam Road Approach,11.02407,76.967932,72,9.54,49.08,Red,Clear,No,High
+15-10-2026 17:30,Cross Cut Road,11.020122,76.965894,85,11.58,69.3,Yellow,Cloudy,No,High
+15-10-2026 17:30,Dr Nanjappa Road,11.015686,76.966673,77,11.74,65.19,Red,Cloudy,No,High
+15-10-2026 17:30,Gandhipuram Bus Stand Approach,11.017819,76.967553,86,7.5,69.06,Green,Cloudy,No,High
+15-10-2026 17:30,Sathy Road Junction,11.021187,76.969933,95,8.3,61.48,Red,Cloudy,No,High
+15-10-2026 18:30,100 Feet Road Junction,11.018983,76.971379,91,7.5,73.91,Yellow,Clear,No,High
+15-10-2026 18:30,Avarampalayam Road Approach,11.024106,76.967984,65,10.46,44.09,Red,Clear,No,High
+15-10-2026 18:30,Cross Cut Road,11.019756,76.966187,84,9.24,63.15,Red,Cloudy,No,High
+15-10-2026 18:30,Dr Nanjappa Road,11.015844,76.966864,60,10.37,52.32,Red,Cloudy,No,High
+15-10-2026 18:30,Gandhipuram Bus Stand Approach,11.018209,76.967515,83,8.2,76.24,Green,Light Rain,No,High
+15-10-2026 18:30,Sathy Road Junction,11.021091,76.969929,92,7.5,68.27,Yellow,Clear,No,High
+15-10-2026 20:00,100 Feet Road Junction,11.018896,76.971082,43,29.39,35.35,Green,Clear,No,Low
+15-10-2026 20:00,Avarampalayam Road Approach,11.023895,76.967933,33,31.1,24.76,Green,Clear,No,Low
+15-10-2026 20:00,Cross Cut Road,11.020279,76.965876,53,28.72,33.73,Yellow,Clear,No,Medium
+15-10-2026 20:00,Dr Nanjappa Road,11.015591,76.966727,39,33.84,23.03,Red,Clear,No,Low
+15-10-2026 20:00,Gandhipuram Bus Stand Approach,11.017796,76.967295,39,35.83,28.2,Green,Clear,No,Low
+15-10-2026 20:00,Sathy Road Junction,11.021289,76.970026,40,25.31,23.97,Red,Clear,No,Medium
+16-10-2026 07:30,100 Feet Road Junction,11.018609,76.97122,74,12.22,45.79,Red,Clear,No,High
+16-10-2026 07:30,Avarampalayam Road Approach,11.02405,76.967752,64,18.18,45.66,Green,Clear,No,Medium
+16-10-2026 07:30,Cross Cut Road,11.019772,76.966315,68,16.92,58.76,Green,Cloudy,No,High
+16-10-2026 07:30,Dr Nanjappa Road,11.015798,76.966722,74,16.97,52.42,Green,Clear,No,High
+16-10-2026 07:30,Gandhipuram Bus Stand Approach,11.018242,76.967651,74,20.91,52.02,Red,Cloudy,No,Medium
+16-10-2026 07:30,Sathy Road Junction,11.021471,76.969881,86,16.68,67.7,Red,Cloudy,No,High
+16-10-2026 08:30,100 Feet Road Junction,11.019,76.971242,75,20.79,68.64,Red,Cloudy,No,High
+16-10-2026 08:30,Avarampalayam Road Approach,11.023983,76.967881,68,19.04,53.3,Green,Cloudy,No,Medium
+16-10-2026 08:30,Cross Cut Road,11.020072,76.966258,75,13.99,63.18,Red,Clear,No,High
+16-10-2026 08:30,Dr Nanjappa Road,11.01545,76.966671,76,15.84,54.85,Green,Clear,No,High
+16-10-2026 08:30,Gandhipuram Bus Stand Approach,11.017922,76.967214,75,12.75,57.03,Green,Clear,No,High
+16-10-2026 08:30,Sathy Road Junction,11.021005,76.969774,86,9.93,75.43,Green,Clear,No,High
+16-10-2026 10:30,100 Feet Road Junction,11.01877,76.97124,53,23.89,44.98,Red,Cloudy,No,Medium
+16-10-2026 10:30,Avarampalayam Road Approach,11.023859,76.967977,39,31.05,29.21,Green,Cloudy,No,Low
+16-10-2026 10:30,Cross Cut Road,11.019964,76.965507,41,24.21,34.51,Red,Clear,No,Medium
+16-10-2026 10:30,Dr Nanjappa Road,11.015655,76.966467,47,25.74,16.37,Red,Clear,No,Medium
+16-10-2026 10:30,Gandhipuram Bus Stand Approach,11.018006,76.967404,50,28.02,41.41,Green,Clear,No,Medium
+16-10-2026 10:30,Sathy Road Junction,11.021331,76.97021,56,24.48,30.11,Green,Clear,No,Medium
+16-10-2026 12:30,100 Feet Road Junction,11.018852,76.971117,69,22.85,37.45,Red,Clear,No,Medium
+16-10-2026 12:30,Avarampalayam Road Approach,11.023943,76.968212,54,30.64,40.09,Red,Clear,No,Medium
+16-10-2026 12:30,Cross Cut Road,11.020168,76.965632,46,26.27,30.18,Red,Clear,No,Medium
+16-10-2026 12:30,Dr Nanjappa Road,11.015533,76.966687,57,27.09,37.34,Red,Clear,No,Medium
+16-10-2026 12:30,Gandhipuram Bus Stand Approach,11.017915,76.967693,68,24.23,49,Red,Cloudy,No,Medium
+16-10-2026 12:30,Sathy Road Junction,11.021303,76.969779,59,26.8,32.78,Green,Clear,No,Medium
+16-10-2026 15:30,100 Feet Road Junction,11.018737,76.971228,52,19.23,30.97,Green,Clear,No,Medium
+16-10-2026 15:30,Avarampalayam Road Approach,11.024046,76.967928,44,24.56,26.46,Green,Clear,No,Medium
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,

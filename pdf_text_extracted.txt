@@ -1,0 +1,134 @@
+    === PAGE 1 ===
+    AI-Powered Proactive Traffic Management and
+    Intelligent Route Recommendation System
+    Knowledge and Semantic Computing
+    Final Year Project
+    Department of Computer Science and Engineering
+    Amrita Vishwa Vidyapeetham
+    July 21, 2026
+    1 / 14
+
+    === PAGE 2 ===
+    Problem Statement
+    Current Problems
+    Increasing traffic congestion
+    Inefficient traffic signal control
+    Delayed emergency vehicle movement
+    Lack of real-time traffic prediction
+    No intelligent alternate route recommendation
+    2 / 14
+
+    === PAGE 3 ===
+    Existing Traffic Management Techniques
+    Fixed-Time Traffic Signals
+    ▶ Operate using fixed timers.
+    Inductive Loop Sensors
+    ▶ Detect vehicles using road-embedded sensors.
+    Computer Vision
+    ▶ Uses CCTV cameras to detect vehicles and traffic density.
+    IoT-Based Monitoring
+    ▶ Collects live traffic data from smart sensors.
+    Adaptive AI Traffic Control
+    ▶ Dynamically adjusts signal timings based on real-time traffic.
+    3 / 14
+
+    === PAGE 4 ===
+    Research Gap
+    Existing systems mainly react after congestion occurs.
+    Most systems do not predict future traffic conditions.
+    Route recommendations are often based on current traffic only.
+    There is limited integration of AI prediction with intelligent route planning.
+    Our system combines Computer Vision, Machine Learning, and Graph Algorithms to
+    provide proactive traffic management.
+    4 / 14
+
+    === PAGE 5 ===
+    Proposed Solution
+    AI-based traffic prediction
+    Live vehicle detection
+    Real-time Congestion Prediction
+    Smart route recommendation
+    Interactive dashboard
+    5 / 14
+
+    === PAGE 6 ===
+    Objectives
+    1 Detect vehicles using Computer Vision (YOLOv8)
+    2 Predict traffic congestion using Machine Learning
+    3 Recommend optimal routes using NetworkX and Dijkstra Algorithm
+    4 Improve real-time traffic management
+    5 Develop Smart City dashboard
+    6 / 14
+
+    === PAGE 7 ===
+    Datasets
+    Dataset Purpose Status
+    IoT cleaned.csv Live Traffic Features Preprocessed
+    mobility cleaned.csv Machine Learning Training Preprocessed
+    traffic mgmt cleaned.csv Feature Analysis Preprocessed
+    traffic cleaned.csv Testing / Validation Preprocessed
+    7 / 14
+
+    === PAGE 8 ===
+    System Architecture
+    8 / 14
+
+    === PAGE 9 ===
+    Technology Stack
+    Category Technology
+    Programming Python
+    Data Processing Pandas, NumPy
+    Machine Learning Scikit-learn, XGBoost
+    Computer Vision OpenCV, YOLOv8
+    Routing NetworkX, Dijkstra Algorithm
+    Dashboard Streamlit
+    Visualization Plotly
+    Model Storage Pickle (.pkl)
+    Machine Learning Models Random Forest
+    9 / 14
+
+    === PAGE 10 ===
+    Expected Output
+    System Features
+    Live Vehicle Detection
+    Traffic Density Analysis
+    Congestion Prediction
+    Smart Route Recommendation
+    Interactive Dashboard
+    10 / 14
+
+    === PAGE 11 ===
+    Current Progress
+    Module Status
+    Dataset Collection Completed
+    Data Cleaning Completed
+    Feature Engineering Completed
+    Machine Learning Training In Progress
+    YOLOv8 Integration Planned
+    Route Recommendation Planned
+    Dashboard Development Planned
+    11 / 14
+
+    === PAGE 12 ===
+    Future Work
+    Train ML models
+    Deploy YOLOv8
+    Integrate NetworkX
+    Build Streamlit Dashboard
+    Validate the system using real-time traffic scenarios and evaluate prediction accuracy.
+    12 / 14
+
+    === PAGE 13 ===
+    References
+    Smart Mobility Dataset (Kaggle)
+    IoT Traffic Flow Dataset (Kaggle)
+    Ultralytics YOLOv8 Documentation
+    OpenCV Documentation
+    Scikit-learn Documentation
+    NetworkX Documentation
+    13 / 14
+
+    === PAGE 14 ===
+    Thank You
+    14 / 14
+
