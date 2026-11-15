@@ -12,6 +12,7 @@ Features 7 Canonical Navigation Sections + Logout:
 
 from __future__ import annotations
 
+from datetime import datetime, time, timedelta
 from typing import Any
 
 import pandas as pd
@@ -39,21 +40,20 @@ def _friendly_risk_label(score: float) -> str:
 
 
 def _human_forecast_text(fc: JunctionForecast) -> str:
-    hhmm = fc.target_timestamp[-5:]
     if fc.predicted_condition == "High":
         return (
-            f"Heavy traffic is expected around {fc.junction} in {fc.horizon_hours} hour(s) "
-            f"(around {hhmm}), with slower average speeds near {fc.predicted_speed_kmh:.0f} km/h. "
+            f"Heavy traffic is expected around {fc.junction} at {fc.target_timestamp}, "
+            f"with slower average speeds near {fc.predicted_speed_kmh:.0f} km/h. "
             "Leaving earlier or taking an alternative route is advised."
         )
     if fc.predicted_condition == "Medium":
         return (
-            f"Moderate traffic is expected around {fc.junction} in {fc.horizon_hours} hour(s) "
-            f"(around {hhmm}), moving near {fc.predicted_speed_kmh:.0f} km/h. Allow a few extra minutes."
+            f"Moderate traffic is expected around {fc.junction} at {fc.target_timestamp}, "
+            f"moving near {fc.predicted_speed_kmh:.0f} km/h. Allow a few extra minutes."
         )
     return (
-        f"Smooth traffic is expected around {fc.junction} in {fc.horizon_hours} hour(s) "
-        f"(around {hhmm}), with speeds near {fc.predicted_speed_kmh:.0f} km/h."
+        f"Smooth traffic is expected around {fc.junction} at {fc.target_timestamp}, "
+        f"with speeds near {fc.predicted_speed_kmh:.0f} km/h."
     )
 
 
@@ -99,6 +99,31 @@ def _render_user_junction_spotlight(jname: str, snap_df: pd.DataFrame) -> None:
     )
 
 
+def _render_user_forecast_spotlight(jname: str, forecast: JunctionForecast) -> None:
+    """Render selected-departure metrics for a junction on the route page."""
+    st.markdown(
+        f"""
+        <div class="detail-panel">
+            <div style="font-size:0.72rem;color:#2563EB;font-weight:700;letter-spacing:0.05em;">
+                JUNCTION INSPECTOR · DEPARTURE PROFILE
+            </div>
+            <div style="font-size:1.10rem;font-weight:700;color:#0F172A;margin:3px 0 6px 0;">
+                {jname}
+            </div>
+            <div style="margin-bottom:8px;">{status_pill_html(forecast.predicted_condition, friendly=True)}</div>
+            <div style="font-size:0.86rem;color:#334155;line-height:1.65;">
+                <b>Departure:</b> {forecast.target_timestamp}<br>
+                <b>Expected Vehicles:</b> {forecast.predicted_vehicle_count:.1f}<br>
+                <b>Expected Speed:</b> {forecast.predicted_speed_kmh:.1f} km/h<br>
+                <b>Road Occupancy:</b> {forecast.predicted_occupancy_pct:.1f}%<br>
+                <b>Congestion Risk:</b> {_friendly_risk_label(forecast.congestion_risk_score)}
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
 def _render_compact_route_card(
     rt: MappedRoute,
     is_rec: bool,
@@ -113,6 +138,7 @@ def _render_compact_route_card(
         else '<span style="font-size:0.72rem;color:#64748B;font-weight:700;">ALTERNATIVE OPTION</span>'
     )
     card_cls = "route-card route-card-rec" if is_rec else "route-card"
+    route_title = "AI Recommended Route" if is_rec else rt.name
     streets = " ➔ ".join(rt.street_names[:3]) + (" ..." if len(rt.street_names) > 3 else "")
     diff_html = ""
     if not is_rec and baseline_time is not None:
@@ -127,9 +153,9 @@ def _render_compact_route_card(
         <div class="{card_cls}">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
                 <div>{badge_html}</div>
-                <div>{status_pill_html(rt.predicted_congestion, friendly=False)}</div>
+                <div><span style="font-size:0.68rem;color:#64748B;font-weight:700;margin-right:5px;">ROUTE</span>{status_pill_html(rt.predicted_congestion, friendly=False)}</div>
             </div>
-            <div style="font-size:1.02rem;font-weight:700;color:#0F172A;margin-bottom:4px;">{rt.name}</div>
+            <div style="font-size:1.02rem;font-weight:700;color:#0F172A;margin-bottom:4px;">{route_title}</div>
             <div style="font-size:0.86rem;color:#334155;line-height:1.6;">
                 <b>Travel Time:</b> {rt.estimated_travel_time_min:.1f} min &nbsp;|&nbsp; <b>Distance:</b> {rt.distance_km:.2f} km<br>
                 <b>Congestion Risk:</b> {_friendly_risk_label(rt.average_risk_score)}<br>
@@ -448,22 +474,62 @@ def render_user_dashboard(
                     index=0,
                     key="usr_rt_dest",
                 )
-                u_dep = st.slider("Planned Departure (Hours Ahead)", 0, 6, 1, key="usr_rt_dep")
+                route_now = datetime.now().replace(second=0, microsecond=0)
+                default_departure = route_now + timedelta(hours=1)
+                u_departure_date = st.date_input(
+                    "Departure Date",
+                    value=default_departure.date(),
+                    min_value=route_now.date(),
+                    key="usr_rt_date",
+                )
+                u_departure_time = st.time_input(
+                    "Departure Time",
+                    value=default_departure.time(),
+                    key="usr_rt_time",
+                )
+                departure_datetime = datetime.combine(u_departure_date, u_departure_time)
+                departure_is_future = departure_datetime > datetime.now()
+                if not departure_is_future:
+                    st.info("Choose a future departure time to compute the route.")
 
-                if st.button("COMPUTE BEST ROUTE", type="primary", width="stretch", key="btn_usr_find_route") or "usr_route_res" not in st.session_state:
+                route_request_signature = (
+                    u_orig,
+                    u_dest,
+                    departure_datetime.strftime("%d-%m-%Y %H:%M"),
+                )
+                compute_clicked = st.button(
+                    "COMPUTE BEST ROUTE",
+                    type="primary",
+                    width="stretch",
+                    key="btn_usr_find_route",
+                    disabled=not departure_is_future,
+                )
+                if compute_clicked or (
+                    "usr_route_res" not in st.session_state
+                    and departure_is_future
+                ):
                     with st.spinner("Calculating OpenStreetMap route options..."):
+                        route_forecasts = predictor.estimate_datetime_profile(departure_datetime)
+                        route_forecast_map = {fc.junction: fc for fc in route_forecasts}
                         bundle = compute_unified_route_comparison(
                             router=router,
                             road_network=road_network,
                             origin=u_orig,
                             destination=u_dest,
-                            departure_horizon_hours=u_dep,
+                            departure_horizon_hours=0,
+                            departure_datetime=departure_datetime,
+                            forecasts_by_junction=route_forecast_map,
                         )
                         st.session_state["usr_route_res"] = bundle
+                        st.session_state["usr_route_res_signature"] = route_request_signature
                         st.session_state["usr_rt_alt_view"] = None
 
-            res_bundle: UnifiedRouteBundle = st.session_state.get("usr_route_res")
+            res_bundle: UnifiedRouteBundle | None = st.session_state.get("usr_route_res")
+            if st.session_state.get("usr_route_res_signature") != route_request_signature:
+                res_bundle = None
+                st.info("Route inputs changed. Compute the route again to update its results.")
             if res_bundle:
+                st.caption(f"Departure: {res_bundle.departure_timestamp}")
                 st.info(f"**Recommendation Rationale:** {res_bundle.recommended_reason}")
                 rec_rt = res_bundle.ai_recommended_route
                 dist_note = "OSM Roads" if res_bundle.uses_real_osm_roads else "Fallback"
@@ -505,18 +571,28 @@ def render_user_dashboard(
                 key="usr_rt_junc_picker",
             )
             st.session_state["usr_rt_sel_j"] = sel_rt_j
-            _render_user_junction_spotlight(sel_rt_j, snap_df)
+            if departure_is_future:
+                inspector_forecasts = predictor.estimate_datetime_profile(
+                    departure_datetime,
+                    junctions=[sel_rt_j],
+                )
+                if inspector_forecasts:
+                    _render_user_forecast_spotlight(sel_rt_j, inspector_forecasts[0])
+                else:
+                    _render_user_junction_spotlight(sel_rt_j, snap_df)
+            else:
+                _render_user_junction_spotlight(sel_rt_j, snap_df)
 
         with col_map:
             if res_bundle:
                 fc_rt = {
-                    f.junction: f
-                    for f in predictor.predict_horizon(horizon_hours=res_bundle.departure_horizon_hours)
+                    name: JunctionForecast(**forecast)
+                    for name, forecast in res_bundle.junction_forecasts.items()
                 }
                 rt_nodes = build_map_nodes(
                     snap_df,
                     forecasts_by_junction=fc_rt,
-                    use_forecast_values=(res_bundle.departure_horizon_hours > 0),
+                    use_forecast_values=True,
                     origin_junction=res_bundle.origin,
                     destination_junction=res_bundle.destination,
                     road_network=road_network,
@@ -529,7 +605,7 @@ def render_user_dashboard(
                     alternative_routes=res_bundle.alternative_routes,
                     selected_alt_route=st.session_state.get("usr_rt_alt_view"),
                     theme_mode="light",
-                    title=f"Route: {res_bundle.origin} ➔ {res_bundle.destination} ({res_bundle.departure_timestamp})",
+                    title=f"Route: {res_bundle.origin} ➔ {res_bundle.destination} (Departure {res_bundle.departure_timestamp})",
                     key_prefix="usr_rt_map",
                     default_height=600,
                     fit_to_routes=True,
@@ -547,84 +623,130 @@ def render_user_dashboard(
             <div class="brand-banner">
                 <div class="brand-title">Future Traffic Congestion Forecast</div>
                 <div class="brand-subtitle">
-                    Select a junction and lookahead window (1–6 hours) to plan your travel and avoid peak congestion bottlenecks.
+                    Select a junction and future date and time to view its typical traffic profile.
                 </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        col_fc1, col_fc2 = st.columns([1.2, 1.0])
+        now = datetime.now().replace(second=0, microsecond=0)
+        default_target = now + timedelta(hours=2)
+        col_fc1, col_fc2, col_fc3 = st.columns([1.3, 1.0, 1.0])
         with col_fc1:
             sel_fc_j = st.selectbox("Select Junction", options=junctions, index=0, key="usr_fc_junc")
         with col_fc2:
-            sel_fc_h = st.slider("Select Forecast Horizon (Hours Ahead)", 1, 6, 2, key="usr_fc_horizon")
-
-        if st.button("Check Forecast", type="primary", key="btn_usr_check_future"):
-            st.session_state["usr_checked_fc"] = True
-
-        fcs = predictor.predict_horizon(horizon_hours=sel_fc_h)
-        fc_map = {f.junction: f for f in fcs}
-        target_fc = fc_map.get(sel_fc_j)
-
-        if target_fc:
-            st.markdown(
-                f"""
-                <div class="kpi-card" style="margin:12px 0;border-left:4px solid #2563EB;">
-                    <div style="font-size:1.05rem;font-weight:700;color:#0F172A;margin-bottom:4px;">
-                        Forecast for {target_fc.junction} at {target_fc.target_timestamp} (+{sel_fc_h}h)
-                    </div>
-                    <div style="margin-bottom:6px;">{status_pill_html(target_fc.predicted_condition, friendly=True)}</div>
-                    <div style="font-size:0.92rem;color:#1E293B;line-height:1.6;">
-                        {_human_forecast_text(target_fc)}
-                    </div>
-                    <div style="font-size:0.84rem;color:#475569;margin-top:6px;">
-                        <b>Expected Vehicles:</b> {target_fc.predicted_vehicle_count} &nbsp;|&nbsp;
-                        <b>Expected Speed:</b> {target_fc.predicted_speed_kmh:.1f} km/h &nbsp;|&nbsp;
-                        <b>Congestion Risk:</b> {_friendly_risk_label(target_fc.congestion_risk_score)}
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
+            sel_fc_date = st.date_input(
+                "Future Date",
+                value=default_target.date(),
+                min_value=now.date(),
+                key="usr_fc_date",
+            )
+        with col_fc3:
+            sel_fc_time = st.time_input(
+                "Future Time",
+                value=default_target.time(),
+                key="usr_fc_time",
             )
 
-        col_fcm, col_fct = st.columns([1.4, 1.0])
-        with col_fcm:
-            fc_nodes = build_map_nodes(
-                snap_df,
-                forecasts_by_junction=fc_map,
-                use_forecast_values=True,
-                selected_junction=sel_fc_j,
-                road_network=road_network,
-            )
-            render_traffic_map(
-                nodes=fc_nodes,
-                road_network=road_network,
-                theme_mode="light",
-                title=f"Predicted Congestion Across Gandhipuram (+{sel_fc_h}h)",
-                key_prefix="usr_future_map",
-                default_height=460,
-                tiles_available=tiles_available,
-                simulate_tile_failure=simulate_tile_failure,
-            )
-        with col_fct:
-            traj = [
-                f
-                for f in predictor.forecast_multi_horizon(max_horizon=6)
-                if f.junction == sel_fc_j
-            ]
-            fig_traj = go.Figure()
-            fig_traj.add_trace(
-                go.Scatter(
-                    x=[f"+{f.horizon_hours}h" for f in traj],
-                    y=[f.predicted_speed_kmh for f in traj],
-                    mode="lines+markers",
-                    name="Speed (km/h)",
-                    line=dict(color="#2563EB", width=2.5),
+        target_datetime = datetime.combine(sel_fc_date, sel_fc_time)
+        if target_datetime <= datetime.now():
+            st.info("Choose a future time to view its traffic profile.")
+        else:
+            fcs = predictor.estimate_datetime_profile(target_datetime)
+            fc_map = {forecast.junction: forecast for forecast in fcs}
+            target_fc = fc_map.get(sel_fc_j)
+
+            if target_fc:
+                st.markdown(
+                    f"""
+                    <div class="kpi-card" style="margin:12px 0;border-left:4px solid #2563EB;">
+                        <div style="font-size:1.05rem;font-weight:700;color:#0F172A;margin-bottom:4px;">
+                            Traffic Profile for {target_fc.junction} at {target_fc.target_timestamp}
+                        </div>
+                        <div style="margin-bottom:6px;">{status_pill_html(target_fc.predicted_condition, friendly=True)}</div>
+                        <div style="font-size:0.92rem;color:#1E293B;line-height:1.6;">
+                            {_human_forecast_text(target_fc)}
+                        </div>
+                        <div style="font-size:0.84rem;color:#475569;margin-top:6px;">
+                            <b>Expected Vehicles:</b> {target_fc.predicted_vehicle_count:.1f} &nbsp;|&nbsp;
+                            <b>Expected Speed:</b> {target_fc.predicted_speed_kmh:.1f} km/h &nbsp;|&nbsp;
+                            <b>Road Occupancy:</b> {target_fc.predicted_occupancy_pct:.1f}% &nbsp;|&nbsp;
+                            <b>Congestion Risk:</b> {_friendly_risk_label(target_fc.congestion_risk_score)}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
                 )
-            )
-            apply_control_center_theme(fig_traj, f"{sel_fc_j} Expected Speed Trend", x_title="Horizon", y_title="Speed (km/h)", theme_mode="light")
-            st.plotly_chart(fig_traj, width="stretch")
+                if target_fc.is_outside_observed_hours:
+                    st.caption("This time is outside the dataset's observed hours; the nearest available time profile is used.")
+
+            col_fcm, col_fct = st.columns([1.4, 1.0])
+            with col_fcm:
+                fc_nodes = build_map_nodes(
+                    snap_df,
+                    forecasts_by_junction=fc_map,
+                    use_forecast_values=True,
+                    selected_junction=sel_fc_j,
+                    road_network=road_network,
+                )
+                render_traffic_map(
+                    nodes=fc_nodes,
+                    road_network=road_network,
+                    theme_mode="light",
+                    title=f"Estimated Traffic Across Gandhipuram ({target_datetime:%d-%m-%Y %H:%M})",
+                    key_prefix="usr_future_map",
+                    default_height=460,
+                    tiles_available=tiles_available,
+                    simulate_tile_failure=simulate_tile_failure,
+                )
+            with col_fct:
+                junction_rows = predictor.df[predictor.df["Location"] == sel_fc_j]
+                profile_minutes = sorted(
+                    set(
+                        (junction_rows["Timestamp_dt"].dt.hour * 60 + junction_rows["Timestamp_dt"].dt.minute)
+                        .astype(int)
+                        .tolist()
+                    )
+                )
+                profile_forecasts = []
+                for minute in profile_minutes:
+                    profile_time = datetime.combine(
+                        sel_fc_date,
+                        time(hour=minute // 60, minute=minute % 60),
+                    )
+                    profile_forecasts.extend(
+                        predictor.estimate_datetime_profile(profile_time, junctions=[sel_fc_j])
+                    )
+
+                fig_traj = go.Figure()
+                fig_traj.add_trace(
+                    go.Scatter(
+                        x=[forecast.target_timestamp[-5:] for forecast in profile_forecasts],
+                        y=[forecast.predicted_speed_kmh for forecast in profile_forecasts],
+                        mode="lines+markers",
+                        name="Typical Speed (km/h)",
+                        line=dict(color="#2563EB", width=2.5),
+                    )
+                )
+                if target_fc:
+                    fig_traj.add_trace(
+                        go.Scatter(
+                            x=[target_datetime.strftime("%H:%M")],
+                            y=[target_fc.predicted_speed_kmh],
+                            mode="markers",
+                            name="Selected Date/Time",
+                            marker=dict(color="#F59E0B", size=11, symbol="diamond"),
+                        )
+                    )
+                apply_control_center_theme(
+                    fig_traj,
+                    f"{sel_fc_j} Typical Daily Speed Profile",
+                    x_title="Time of Day",
+                    y_title="Speed (km/h)",
+                    theme_mode="light",
+                )
+                st.plotly_chart(fig_traj, width="stretch")
 
     # =========================================================================
     # 5. TRAFFIC ALERTS

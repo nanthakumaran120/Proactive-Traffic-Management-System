@@ -6,6 +6,7 @@ Uses ONLY datasets/gandhipuram_coimbatore_traffic_synthetic.csv.
 from __future__ import annotations
 
 import json
+import hashlib
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any
@@ -523,6 +524,135 @@ class FutureTrafficPredictor:
         """Return each junction's single most recent observation in the dataset."""
         idx = self.df.groupby("Location")["Timestamp_dt"].idxmax()
         return self.df.loc[idx].sort_values("Location").reset_index(drop=True)
+
+    def estimate_datetime_profile(
+        self,
+        target_timestamp: pd.Timestamp | str,
+        junctions: list[str] | None = None,
+    ) -> list[JunctionForecast]:
+        """Estimate traffic from junction time-of-day averages for any calendar date/time.
+
+        Friday/Saturday and Sunday profiles receive stable, small traffic and occupancy
+        adjustments for the Future Traffic calendar picker. Generated values are returned
+        in memory and never added to the source dataset or model training rows.
+        """
+        target = pd.Timestamp(target_timestamp)
+        if target.tzinfo is not None:
+            target = target.tz_localize(None)
+        target_minute = target.hour * 60 + target.minute
+        selected = set(junctions) if junctions is not None else set(self.junctions)
+        output: list[JunctionForecast] = []
+        source_latest = self.df["Timestamp_dt"].max()
+        base_label = source_latest.strftime("%d-%m-%Y %H:%M")
+        horizon_hours = max(0, int(round((target - source_latest).total_seconds() / 3600.0)))
+
+        for location in self.junctions:
+            if location not in selected:
+                continue
+            history = self.df[self.df["Location"] == location].copy()
+            history["_minute"] = history["Timestamp_dt"].dt.hour * 60 + history["Timestamp_dt"].dt.minute
+            history["_low"] = (history["Traffic_Condition"] == "Low").astype(float)
+            history["_medium"] = (history["Traffic_Condition"] == "Medium").astype(float)
+            history["_high"] = (history["Traffic_Condition"] == "High").astype(float)
+            profile = (
+                history.groupby("_minute", as_index=False)
+                .agg(
+                    Vehicle_Count=("Vehicle_Count", "mean"),
+                    Traffic_Speed_kmh=("Traffic_Speed_kmh", "mean"),
+                    Road_Occupancy_pct=("Road_Occupancy_pct", "mean"),
+                    Low=("_low", "mean"),
+                    Medium=("_medium", "mean"),
+                    High=("_high", "mean"),
+                )
+                .sort_values("_minute")
+            )
+            minute_values = profile["_minute"].to_numpy(dtype=float)
+            outside_hours = bool(target_minute < minute_values[0] or target_minute > minute_values[-1])
+
+            def at_time(column: str) -> float:
+                return float(np.interp(target_minute, minute_values, profile[column].to_numpy(dtype=float)))
+
+            base_count = at_time("Vehicle_Count")
+            base_speed = at_time("Traffic_Speed_kmh")
+            base_occupancy = at_time("Road_Occupancy_pct")
+            weekday_probs = {name: at_time(name) for name in ("Low", "Medium", "High")}
+            probs_total = sum(weekday_probs.values()) or 1.0
+            weekday_probs = {name: value / probs_total for name, value in weekday_probs.items()}
+
+            # Weekend profile adjustments are intentionally small and repeatable per
+            # junction/date/time so Streamlit reruns do not make the values jump.
+            day = target.dayofweek
+            speed_jitter = 0.0
+            if day in (4, 5):  # Friday and Saturday
+                count_factor, occupancy_add, speed_range, speed_bias = 1.05, 3.0, 2.0, -0.25
+            elif day == 6:  # Sunday
+                count_factor, occupancy_add, speed_range, speed_bias = 1.10, 5.0, 3.0, -0.5
+            else:
+                count_factor, occupancy_add, speed_range, speed_bias = 1.0, 0.0, 0.0, 0.0
+
+            if speed_range:
+                seed_text = f"{location}|{target:%Y-%m-%d %H:%M}"
+                digest = hashlib.sha256(seed_text.encode("utf-8")).digest()
+                signed_unit = (int.from_bytes(digest[:4], "big") / 0xFFFFFFFF) * 2.0 - 1.0
+                speed_jitter = signed_unit * speed_range + speed_bias
+
+            count = float(np.clip(base_count * count_factor, 10.0, 120.0))
+            speed = float(np.clip(base_speed + speed_jitter, 5.0, 45.0))
+            occupancy = float(np.clip(base_occupancy + occupancy_add, 8.0, 99.0))
+
+            # Classify the adjusted metrics using their nearest observed examples at
+            # this junction, preserving the project's existing Low/Medium/High labels.
+            metric_cols = ["Vehicle_Count", "Traffic_Speed_kmh", "Road_Occupancy_pct"]
+            observed = history[metric_cols].to_numpy(dtype=float)
+            means = observed.mean(axis=0)
+            scales = observed.std(axis=0)
+            scales[scales == 0.0] = 1.0
+            requested = np.array([count, speed, occupancy], dtype=float)
+            distances = np.sqrt((((observed - requested) / scales) ** 2).sum(axis=1))
+            nearest = np.argsort(distances)[: min(7, len(history))]
+            weights = 1.0 / (distances[nearest] + 0.05)
+            class_probs = {"Low": 0.0, "Medium": 0.0, "High": 0.0}
+            for index, weight in zip(nearest, weights):
+                class_probs[str(history.iloc[index]["Traffic_Condition"])] += float(weight)
+            total_weight = sum(class_probs.values()) or 1.0
+            class_probs = {name: round(value / total_weight, 4) for name, value in class_probs.items()}
+            condition = max(class_probs.items(), key=lambda item: item[1])[0]
+            baseline_condition = max(weekday_probs.items(), key=lambda item: item[1])[0]
+            risk = self._compute_risk_score(class_probs, speed, occupancy)
+            weather_values = history["Weather_Condition"].mode()
+            weather = str(weather_values.iloc[0]) if not weather_values.empty else "Unknown"
+            row = history.iloc[0]
+
+            output.append(
+                JunctionForecast(
+                    junction=location,
+                    latitude=float(row["Latitude"]),
+                    longitude=float(row["Longitude"]),
+                    base_timestamp=base_label,
+                    target_timestamp=target.strftime("%d-%m-%Y %H:%M"),
+                    horizon_hours=horizon_hours,
+                    current_condition=baseline_condition,
+                    current_vehicle_count=round(base_count, 1),
+                    current_speed_kmh=round(base_speed, 2),
+                    current_occupancy_pct=round(base_occupancy, 2),
+                    predicted_condition=condition,
+                    predicted_vehicle_count=round(count, 1),
+                    predicted_speed_kmh=round(speed, 2),
+                    predicted_occupancy_pct=round(occupancy, 2),
+                    congestion_probability=class_probs["High"],
+                    class_probabilities=class_probs,
+                    congestion_risk_score=risk,
+                    prediction_confidence=round(max(class_probs.values()) * 100.0, 1),
+                    weather_scenario=weather,
+                    accident_scenario="No",
+                    is_outside_observed_hours=outside_hours,
+                    scenario_adjusted=day in (4, 5, 6),
+                    forecast_note="Average traffic profile by junction and time of day",
+                    is_model_forecast=False,
+                )
+            )
+
+        return output
 
     @staticmethod
     def _compute_risk_score(

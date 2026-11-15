@@ -225,6 +225,7 @@ class FutureRouteRecommender:
         weather_scenario: str = "Clear",
         accident_junctions: list[str] | set[str] | None = None,
         top_k_alternatives: int = 3,
+        forecasts_by_junction: dict[str, JunctionForecast] | None = None,
     ) -> RouteComparisonResult:
         """Compute Route 1 (Shortest Distance) vs Route 2 (Future AI Route) and alternatives."""
         if origin not in self.node_coords:
@@ -234,13 +235,17 @@ class FutureRouteRecommender:
         if origin == destination:
             raise ValueError("Origin and destination junctions must be different.")
 
-        forecasts = self.predictor.predict_horizon(
-            horizon_hours=departure_horizon_hours,
-            base_timestamp=base_timestamp,
-            weather_override=weather_scenario,
-            accident_junctions=accident_junctions,
-        )
-        fc_map = {fc.junction: fc for fc in forecasts}
+        if forecasts_by_junction is None:
+            forecasts = self.predictor.predict_horizon(
+                horizon_hours=departure_horizon_hours,
+                base_timestamp=base_timestamp,
+                weather_override=weather_scenario,
+                accident_junctions=accident_junctions,
+            )
+            fc_map = {fc.junction: fc for fc in forecasts}
+        else:
+            fc_map = forecasts_by_junction
+            forecasts = list(fc_map.values())
         graph = self.build_weighted_graph(fc_map, weather_scenario=weather_scenario)
 
         # Route 1: Normal Shortest Route (pure distance_km Dijkstra)
