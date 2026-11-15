@@ -167,19 +167,29 @@ def compute_unified_route_comparison(
     weather_scenario: str = "Clear",
     accident_junctions: list[str] | set[str] | None = None,
     top_k_alternatives: int = 2,
+    departure_datetime: pd.Timestamp | str | None = None,
+    forecasts_by_junction: dict[str, JunctionForecast] | None = None,
 ) -> UnifiedRouteBundle:
     """Compute Shortest, AI Recommended, and Alternative routes over real OSM roads or schematic fallback."""
     if origin == destination:
         raise ValueError("Origin and destination junctions must be different.")
 
-    forecasts = router.predictor.predict_horizon(
-        horizon_hours=departure_horizon_hours,
-        base_timestamp=base_timestamp,
-        weather_override=weather_scenario,
-        accident_junctions=accident_junctions,
+    if forecasts_by_junction is None:
+        forecasts = router.predictor.predict_horizon(
+            horizon_hours=departure_horizon_hours,
+            base_timestamp=base_timestamp,
+            weather_override=weather_scenario,
+            accident_junctions=accident_junctions,
+        )
+        fc_map = {fc.junction: fc for fc in forecasts}
+    else:
+        fc_map = forecasts_by_junction
+        forecasts = list(fc_map.values())
+    departure_ts = (
+        pd.Timestamp(departure_datetime).strftime("%d-%m-%Y %H:%M")
+        if departure_datetime is not None
+        else (forecasts[0].target_timestamp if forecasts else "")
     )
-    fc_map = {fc.junction: fc for fc in forecasts}
-    departure_ts = forecasts[0].target_timestamp if forecasts else ""
 
     if road_network is not None and road_network.is_real_osm:
         shortest = road_network.find_route(
@@ -221,6 +231,7 @@ def compute_unified_route_comparison(
             weather_scenario=weather_scenario,
             accident_junctions=accident_junctions,
             top_k_alternatives=top_k_alternatives,
+            forecasts_by_junction=fc_map,
         )
         shortest = _schematic_summary_to_mapped(schem.shortest_route, router.node_coords)
         ai_route = _schematic_summary_to_mapped(schem.ai_recommended_route, router.node_coords)
