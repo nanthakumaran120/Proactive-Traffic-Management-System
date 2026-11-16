@@ -914,27 +914,16 @@ def render_user_dashboard(
         with col_a2:
             with st.container(border=True):
                 st.markdown("#### Change Password")
-                with st.form("usr_change_password_form"):
-                    c_old = st.text_input("Current Password", type="password", key="usr_pw_old")
-                    c_new = st.text_input("New Password (min 8 chars)", type="password", key="usr_pw_new")
-                    c_conf = st.text_input("Confirm New Password", type="password", key="usr_pw_conf")
-                    change_password = st.form_submit_button(
-                        "Update Password",
-                        type="primary",
-                        key="btn_usr_change_pw",
-                        width="stretch",
-                    )
-                if change_password:
-                    if not c_old or not c_new or not c_conf:
-                        st.error("Fill in all three password fields, then try again.")
-                    elif len(c_new) < 8:
-                        st.error("Use at least 8 characters for the new password.")
-                    elif c_new != c_conf:
+                c_old = st.text_input("Current Password", type="password", key="usr_pw_old")
+                c_new = st.text_input("New Password (min 8 chars)", type="password", key="usr_pw_new")
+                c_conf = st.text_input("Confirm New Password", type="password", key="usr_pw_conf")
+                if st.button("Update Password", type="primary", key="btn_usr_change_pw"):
+                    if c_new != c_conf:
                         st.error("New passwords do not match.")
                     else:
                         try:
-                            auth.change_own_password(auth_token, c_old, c_new)
-                            st.success("Password updated. Use the new password next time you sign in.")
+                            auth.change_password(auth_token, c_old, c_new)
+                            st.success("Password updated successfully.")
                         except Exception as err:
                             st.error(f"Error updating password: {err}")
 
