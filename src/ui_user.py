@@ -64,14 +64,6 @@ def _apply_user_map_click(clicked: str | None, state_key: str, last_click_key: s
         st.rerun()
 
 
-def _navigate_user_page() -> None:
-    """Keep the public navigation selector and URL in sync."""
-    selected = st.session_state.get("usr_nav_select", "Home")
-    st.session_state["nav_page"] = selected
-    st.query_params["page"] = selected
-    st.session_state["_last_qp_page"] = selected
-
-
 def _get_emergency_manager() -> EmergencyEventManager:
     if "emergency_event_manager" not in st.session_state:
         st.session_state["emergency_event_manager"] = EmergencyEventManager()
@@ -87,10 +79,10 @@ def _render_user_junction_spotlight(jname: str, snap_df: pd.DataFrame) -> None:
     st.markdown(
         f"""
         <div class="detail-panel">
-            <div style="font-size:0.72rem;color:#176B68;font-weight:700;letter-spacing:0.05em;">
+            <div style="font-size:0.72rem;color:#2563EB;font-weight:700;letter-spacing:0.05em;">
                 JUNCTION INSPECTOR
             </div>
-            <div style="font-size:1.10rem;font-weight:700;color:#202A28;margin:3px 0 6px 0;">
+            <div style="font-size:1.10rem;font-weight:700;color:#0F172A;margin:3px 0 6px 0;">
                 {jname}
             </div>
             <div style="margin-bottom:8px;">{status_pill_html(cond, friendly=True)}</div>
@@ -112,10 +104,10 @@ def _render_user_forecast_spotlight(jname: str, forecast: JunctionForecast) -> N
     st.markdown(
         f"""
         <div class="detail-panel">
-            <div style="font-size:0.72rem;color:#176B68;font-weight:700;letter-spacing:0.05em;">
+            <div style="font-size:0.72rem;color:#2563EB;font-weight:700;letter-spacing:0.05em;">
                 JUNCTION INSPECTOR · DEPARTURE PROFILE
             </div>
-            <div style="font-size:1.10rem;font-weight:700;color:#202A28;margin:3px 0 6px 0;">
+            <div style="font-size:1.10rem;font-weight:700;color:#0F172A;margin:3px 0 6px 0;">
                 {jname}
             </div>
             <div style="margin-bottom:8px;">{status_pill_html(forecast.predicted_condition, friendly=True)}</div>
@@ -163,7 +155,7 @@ def _render_compact_route_card(
                 <div>{badge_html}</div>
                 <div><span style="font-size:0.68rem;color:#64748B;font-weight:700;margin-right:5px;">ROUTE</span>{status_pill_html(rt.predicted_congestion, friendly=False)}</div>
             </div>
-            <div style="font-size:1.02rem;font-weight:700;color:#202A28;margin-bottom:4px;">{route_title}</div>
+            <div style="font-size:1.02rem;font-weight:700;color:#0F172A;margin-bottom:4px;">{route_title}</div>
             <div style="font-size:0.86rem;color:#334155;line-height:1.6;">
                 <b>Travel Time:</b> {rt.estimated_travel_time_min:.1f} min &nbsp;|&nbsp; <b>Distance:</b> {rt.distance_km:.2f} km<br>
                 <b>Congestion Risk:</b> {_friendly_risk_label(rt.average_risk_score)}<br>
@@ -205,33 +197,46 @@ def render_user_dashboard(
 
     canon_page = USER_PAGE_ALIASES.get(requested_page, requested_page)
     current_page = canon_page if canon_page in USER_PAGES else "Home"
-    if st.session_state.get("usr_nav_select") != current_page:
-        st.session_state["usr_nav_select"] = current_page
 
-    # Compact public navigation, sized for desktop and narrow screens.
-    with st.container(border=True):
-        h_brand, h_nav, h_user = st.columns([1.2, 2.1, 1.0])
+    # Top Navigation Header Bar (Logo + 7 Tabs + Signed-in User + Logout)
+    with st.container():
+        st.markdown('<div class="nav-header-bar">', unsafe_allow_html=True)
+        h_brand, h_nav, h_user = st.columns([1.35, 3.2, 1.15])
         with h_brand:
             st.markdown(
-                "<div class='user-brand-title'>Gandhipuram Traffic</div>"
-                "<div class='user-brand-location'>Coimbatore</div>",
+                "<div style='font-size:1.05rem;font-weight:800;color:#0F172A;padding-top:4px;'>"
+                "🚦 Smart City Navigator</div>"
+                "<div style='font-size:0.74rem;color:#64748B;'>Gandhipuram, Coimbatore</div>",
                 unsafe_allow_html=True,
             )
         with h_nav:
-            st.selectbox(
-                "Go to page",
-                options=list(USER_PAGES),
-                index=USER_PAGES.index(current_page),
-                key="usr_nav_select",
-                label_visibility="collapsed",
-                on_change=_navigate_user_page,
-            )
+            nav_cols = st.columns(len(USER_PAGES))
+            for idx, pg in enumerate(USER_PAGES):
+                with nav_cols[idx]:
+                    btn_type = "primary" if current_page == pg else "secondary"
+                    if st.button(pg, key=f"usr_nav_{pg}", type=btn_type, width="stretch"):
+                        st.session_state["nav_page"] = pg
+                        st.query_params["page"] = pg
+                        st.session_state["_last_qp_page"] = pg
+                        st.rerun()
+
+                    # Provide legacy alias button keys invisibly if clicked programmatically by tests
+                    for alias_name, target_canon in USER_PAGE_ALIASES.items():
+                        if target_canon == pg:
+                            alias_key = f"usr_nav_{alias_name}"
+                            if st.session_state.get(alias_key):
+                                st.session_state[alias_key] = False
+                                st.session_state["nav_page"] = pg
+                                st.query_params["page"] = pg
+                                st.session_state["_last_qp_page"] = pg
+                                st.rerun()
 
         with h_user:
             u_c1, u_c2 = st.columns([1.2, 0.9])
             with u_c1:
                 st.markdown(
-                    f"<div class='user-account-name' style='font-size:0.78rem;padding-top:6px;' title='{verified_user.username}'>"
+                    f"<div style='font-size:0.78rem;color:#334155;text-align:right;padding-top:6px;"
+                    f"overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' title='{verified_user.username}'>"
                     f"<b>{verified_user.username}</b></div>",
                     unsafe_allow_html=True,
                 )
@@ -245,11 +250,12 @@ def render_user_dashboard(
                         "_last_qp_page",
                         "admin_sidebar_nav",
                         "user_sidebar_nav",
-                        "usr_nav_select",
                     ):
                         st.session_state.pop(k, None)
                     st.query_params.clear()
                     st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+
     # Active Emergency Public Advisory Banner
     public_adv = emg_mgr.get_public_traffic_advisory()
     if public_adv:
@@ -428,7 +434,7 @@ def render_user_dashboard(
                 border_c = CONDITION_COLORS.get(cond, "#CBD5E1")
                 st.markdown(
                     f'<div class="junction-card" style="border-top:3px solid {border_c};">'
-                    f'<div style="font-size:1.02rem;font-weight:700;color:#202A28;margin-bottom:4px;">{row["Location"]}</div>'
+                    f'<div style="font-size:1.02rem;font-weight:700;color:#0F172A;margin-bottom:4px;">{row["Location"]}</div>'
                     f'<div style="margin-bottom:6px;">{status_pill_html(cond, friendly=True)}</div>'
                     f'<div style="font-size:0.86rem;color:#334155;line-height:1.6;">'
                     f'<b>Vehicles:</b> {int(row["Vehicle_Count"])} &nbsp;|&nbsp; '
@@ -654,8 +660,8 @@ def render_user_dashboard(
             if target_fc:
                 st.markdown(
                     f"""
-                    <div class="kpi-card" style="margin:12px 0;border-left:4px solid #176B68;">
-                        <div style="font-size:1.05rem;font-weight:700;color:#202A28;margin-bottom:4px;">
+                    <div class="kpi-card" style="margin:12px 0;border-left:4px solid #2563EB;">
+                        <div style="font-size:1.05rem;font-weight:700;color:#0F172A;margin-bottom:4px;">
                             Traffic Profile for {target_fc.junction} at {target_fc.target_timestamp}
                         </div>
                         <div style="margin-bottom:6px;">{status_pill_html(target_fc.predicted_condition, friendly=True)}</div>
@@ -720,7 +726,7 @@ def render_user_dashboard(
                         y=[forecast.predicted_speed_kmh for forecast in profile_forecasts],
                         mode="lines+markers",
                         name="Typical Speed (km/h)",
-                        line=dict(color="#176B68", width=2.5),
+                        line=dict(color="#2563EB", width=2.5),
                     )
                 )
                 if target_fc:
@@ -796,7 +802,7 @@ def render_user_dashboard(
                         st.markdown(
                             f"""
                             <div style="border-left:4px solid {b_color};padding-left:8px;">
-                                <div style="font-weight:700;font-size:1.02rem;color:#202A28;">{al.junction}</div>
+                                <div style="font-weight:700;font-size:1.02rem;color:#0F172A;">{al.junction}</div>
                                 <div style="font-size:0.86rem;color:#475569;margin:4px 0;">
                                     <b>Expected In:</b> {al.horizon_hours} hour(s) &nbsp;|&nbsp; <b>Risk:</b> {al.congestion_risk_score:.0f}/100
                                 </div>
