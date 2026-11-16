@@ -79,8 +79,8 @@ def main() -> None:
         render_login_page(auth)
         return
 
-    # Inject role-appropriate commercial theme: Dark Control Centre (Admin) vs Light Navigation (User)
-    inject_theme("light" if current_user.role == "user" else "dark")
+    # Admin/login retain the dark control-centre theme; users inherit Streamlit's selected theme.
+    inject_theme("streamlit" if current_user.role == "user" else "dark")
 
     # Prevent direct URL / session tampering from opening unauthorized pages
     qp_page = st.query_params.get("page")

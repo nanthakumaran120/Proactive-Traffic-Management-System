@@ -109,6 +109,7 @@ def build_real_traffic_map_figure(
     focus_junction: str | None = None,
     fit_to_routes: bool = True,
     show_road_background: bool = True,
+    show_congestion_segments: bool = True,
 ) -> go.Figure:
     """Construct interactive Plotly MapLibre figure with OSM street geometry & markers."""
     fig = go.Figure()
@@ -146,7 +147,7 @@ def build_real_traffic_map_figure(
         )
 
     # 2. High-congestion affected road segments (strictly from mapped OSM ways near High junctions)
-    high_segs = extract_high_congestion_road_segments(road_network, nodes)
+    high_segs = extract_high_congestion_road_segments(road_network, nodes) if show_congestion_segments else []
     if high_segs:
         h_lats, h_lons = _polylines_to_lat_lon([s["coords"] for s in high_segs])
         fig.add_trace(
@@ -394,31 +395,45 @@ def render_traffic_map(
     default_height: int = 540,
     tiles_available: bool = True,
     simulate_tile_failure: bool = False,
+    allow_congestion_overlay_toggle: bool = False,
 ) -> str | None:
     """Render the reusable interactive map with basemap switcher, expand toggle, legend & click capture."""
     options = BASEMAP_OPTIONS_DARK if theme_mode == "dark" else BASEMAP_OPTIONS_LIGHT
     opt_labels = list(options.keys())
 
-    c_layer, c_exp, c_status = st.columns([1.4, 0.9, 1.7])
-    with c_layer:
-        chosen_lbl = st.selectbox(
-            "Map Layer",
-            options=opt_labels,
-            index=0,
-            key=f"{key_prefix}_basemap",
-            label_visibility="collapsed",
-        )
-    with c_exp:
-        expanded = st.toggle("Expanded Map", value=False, key=f"{key_prefix}_expand")
+    with st.container(border=True):
+        if allow_congestion_overlay_toggle:
+            c_layer, c_exp, c_overlay, c_status = st.columns([1.2, 0.8, 1.0, 1.55])
+        else:
+            c_layer, c_exp, c_status = st.columns([1.4, 0.9, 1.7])
+        show_congestion_segments = True
+        with c_layer:
+            chosen_lbl = st.selectbox(
+                "Map Layer",
+                options=opt_labels,
+                index=0,
+                key=f"{key_prefix}_basemap",
+                label_visibility="collapsed",
+            )
+        with c_exp:
+            expanded = st.toggle("Expanded Map", value=False, key=f"{key_prefix}_expand")
+        if allow_congestion_overlay_toggle:
+            with c_overlay:
+                show_congestion_segments = st.toggle(
+                    "Congestion",
+                    value=False,
+                    key=f"{key_prefix}_congestion_roads",
+                    help="Show road segments near junctions marked High congestion.",
+                )
 
-    requested_style = options[chosen_lbl]
-    tile_fallback_active = simulate_tile_failure or (not tiles_available and requested_style != "white-bg")
-    effective_style = "white-bg" if tile_fallback_active else requested_style
+        requested_style = options[chosen_lbl]
+        tile_fallback_active = simulate_tile_failure or (not tiles_available and requested_style != "white-bg")
+        effective_style = "white-bg" if tile_fallback_active else requested_style
 
-    with c_status:
-        road_tag = "OSM Mapped Roads" if (road_network and road_network.is_real_osm) else "Schematic Fallback"
-        tile_tag = "Offline Vector Canvas" if effective_style == "white-bg" else chosen_lbl
-        st.caption(f"Roads: **{road_tag}** &nbsp;|&nbsp; Basemap: **{tile_tag}**")
+        with c_status:
+            road_tag = "OSM Mapped Roads" if (road_network and road_network.is_real_osm) else "Schematic Fallback"
+            tile_tag = "Offline Vector Canvas" if effective_style == "white-bg" else chosen_lbl
+            st.caption(f"Roads: **{road_tag}** &nbsp;|&nbsp; Basemap: **{tile_tag}**")
 
     if tile_fallback_active:
         st.warning(
@@ -446,6 +461,7 @@ def render_traffic_map(
         height=map_height,
         focus_junction=focus_junction,
         fit_to_routes=fit_to_routes,
+        show_congestion_segments=show_congestion_segments,
     )
 
     event: Any = st.plotly_chart(
@@ -457,17 +473,16 @@ def render_traffic_map(
         config={"scrollZoom": True, "displayModeBar": True},
     )
 
-    # Compact accessible legend strip below the map
+    # Persistent compact legend: each state has a text label as well as a color.
     st.markdown(
-        '<div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:0.80rem;opacity:0.9;margin:4px 0 8px 0;">'
-        '<span><span style="color:#22C55E;">●</span> Low</span>'
-        '<span><span style="color:#F59E0B;">●</span> Medium</span>'
-        '<span><span style="color:#EF4444;">●</span> High</span>'
-        '<span><span style="color:#3B82F6;">●</span> Selected / Shortest</span>'
-        '<span><span style="color:#10B981;">━</span> AI Recommended</span>'
-        '<span><span style="color:#64748B;">━</span> Alternative</span>'
-        '<span><span style="color:#A855F7;">━</span> Emergency Corridor</span>'
-        '<span><span style="color:#94A3B8;">ⓘ</span> Tip: Click any junction marker to inspect details; use scroll wheel / drag to zoom & pan.</span>'
+        '<div class="map-legend" role="group" aria-label="Map legend">'
+        '<span><i class="legend-dot legend-low"></i>Low congestion</span>'
+        '<span><i class="legend-dot legend-medium"></i>Medium congestion</span>'
+        '<span><i class="legend-dot legend-high"></i>High congestion</span>'
+        '<span><i class="legend-line legend-recommended"></i>AI recommended</span>'
+        '<span><i class="legend-line legend-alternative"></i>Alternative</span>'
+        '<span><i class="legend-line legend-emergency"></i>Emergency corridor</span>'
+        '<span class="map-tip">Click a junction to inspect it · Scroll or drag to navigate</span>'
         "</div>",
         unsafe_allow_html=True,
     )
