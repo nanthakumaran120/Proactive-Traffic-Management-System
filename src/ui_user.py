@@ -31,12 +31,40 @@ from src.route_visualization import UnifiedRouteBundle, compute_unified_route_co
 from src.ui_theme import render_kpi_card, render_limitation_footer, status_pill_html
 
 
+USER_NAV_LABELS = {
+    "Traffic Map": "Map",
+    "Find Route": "Route",
+    "Future Traffic": "Forecast",
+    "Traffic Alerts": "Alerts",
+    "Emergency Information": "Emergency",
+}
+USER_PRIMARY_PAGES = ("Home", "Traffic Map", "Find Route", "Future Traffic")
+USER_MORE_PAGES = ("Traffic Alerts", "Emergency Information", "Account")
+
+
 def _friendly_risk_label(score: float) -> str:
     if score >= 70.0:
         return f"High Risk ({score:.0f}/100)"
     if score >= 40.0:
         return f"Moderate Risk ({score:.0f}/100)"
     return f"Low Risk ({score:.0f}/100)"
+
+
+def _risk_category_label(score: float) -> str:
+    if score >= 70.0:
+        return "High Risk"
+    if score >= 40.0:
+        return "Moderate Risk"
+    return "Low Risk"
+
+
+def _active_streamlit_theme_mode() -> str:
+    """Read the selected Streamlit theme for Plotly and map rendering."""
+    try:
+        selected = st.context.theme.type
+        return selected if selected in {"light", "dark"} else "light"
+    except (AttributeError, KeyError, TypeError):
+        return "light"
 
 
 def _human_forecast_text(fc: JunctionForecast) -> str:
@@ -76,6 +104,8 @@ def _render_user_junction_spotlight(jname: str, snap_df: pd.DataFrame) -> None:
         return
     row = match.iloc[0]
     cond = str(row["Traffic_Condition"])
+    observed_at = pd.to_datetime(row["Timestamp"], errors="coerce")
+    updated_label = observed_at.strftime("%d %b %Y · %H:%M") if pd.notna(observed_at) else str(row["Timestamp"])
     st.markdown(
         f"""
         <div class="detail-panel">
@@ -86,13 +116,13 @@ def _render_user_junction_spotlight(jname: str, snap_df: pd.DataFrame) -> None:
                 {jname}
             </div>
             <div style="margin-bottom:8px;">{status_pill_html(cond, friendly=True)}</div>
-            <div style="font-size:0.86rem;color:#334155;line-height:1.65;">
-                <b>Observed Vehicles:</b> {int(row['Vehicle_Count'])}<br>
-                <b>Average Speed:</b> {float(row['Traffic_Speed_kmh']):.1f} km/h<br>
-                <b>Road Occupancy:</b> {float(row['Road_Occupancy_pct']):.1f}%<br>
-                <b>Signal State:</b> {row['Traffic_Light_State']}<br>
-                <b>Last Update:</b> {row['Timestamp']}
+            <div class="metric-grid">
+                <div class="mini-metric"><span>Vehicles</span><strong>{int(row['Vehicle_Count'])}</strong></div>
+                <div class="mini-metric"><span>Average speed</span><strong>{float(row['Traffic_Speed_kmh']):.1f} km/h</strong></div>
+                <div class="mini-metric"><span>Road occupancy</span><strong>{float(row['Road_Occupancy_pct']):.1f}%</strong></div>
+                <div class="mini-metric"><span>Signal</span><strong>{row['Traffic_Light_State']}</strong></div>
             </div>
+            <div class="updated-at">Updated {updated_label}</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -111,17 +141,33 @@ def _render_user_forecast_spotlight(jname: str, forecast: JunctionForecast) -> N
                 {jname}
             </div>
             <div style="margin-bottom:8px;">{status_pill_html(forecast.predicted_condition, friendly=True)}</div>
-            <div style="font-size:0.86rem;color:#334155;line-height:1.65;">
-                <b>Departure:</b> {forecast.target_timestamp}<br>
-                <b>Expected Vehicles:</b> {forecast.predicted_vehicle_count:.1f}<br>
-                <b>Expected Speed:</b> {forecast.predicted_speed_kmh:.1f} km/h<br>
-                <b>Road Occupancy:</b> {forecast.predicted_occupancy_pct:.1f}%<br>
-                <b>Congestion Risk:</b> {_friendly_risk_label(forecast.congestion_risk_score)}
+            <div class="metric-grid">
+                <div class="mini-metric"><span>Expected vehicles</span><strong>{forecast.predicted_vehicle_count:.1f}</strong></div>
+                <div class="mini-metric"><span>Expected speed</span><strong>{forecast.predicted_speed_kmh:.1f} km/h</strong></div>
+                <div class="mini-metric"><span>Road occupancy</span><strong>{forecast.predicted_occupancy_pct:.1f}%</strong></div>
+                <div class="mini-metric"><span>Congestion risk</span><strong>{_friendly_risk_label(forecast.congestion_risk_score)}</strong></div>
             </div>
+            <div class="updated-at">Departure profile · {forecast.target_timestamp}</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+
+
+def _render_trip_summary(route: MappedRoute, origin: str, destination: str, departure: str) -> None:
+    """Show the route result's key details together above its map."""
+    with st.container(border=True):
+        st.markdown(f"**AI Recommended Route**  \n{origin} → {destination} · {departure}")
+        st.markdown(
+            f'<div class="trip-summary-grid" role="group" aria-label="Recommended trip summary">'
+            f'<div class="trip-summary-item"><span>Travel time</span><strong>{route.estimated_travel_time_min:.1f} min</strong></div>'
+            f'<div class="trip-summary-item"><span>Distance</span><strong>{route.distance_km:.2f} km</strong></div>'
+            f'<div class="trip-summary-item"><span>Congestion</span><strong>{route.predicted_congestion}</strong></div>'
+            f'<div class="trip-summary-item trip-summary-risk-item"><span>Risk</span>'
+            f'<strong class="trip-summary-risk">{_risk_category_label(route.average_risk_score)}</strong></div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
 
 def _render_compact_route_card(
@@ -137,38 +183,43 @@ def _render_compact_route_card(
         if is_rec
         else '<span style="font-size:0.72rem;color:#64748B;font-weight:700;">ALTERNATIVE OPTION</span>'
     )
-    card_cls = "route-card route-card-rec" if is_rec else "route-card"
+    selected_route = st.session_state.get(selected_alt_key)
+    is_selected = not is_rec and selected_route == rt
+    card_cls = "route-card route-card-rec" if is_rec else "route-card route-card-alt-selected" if is_selected else "route-card"
     route_title = "AI Recommended Route" if is_rec else rt.name
     streets = " ➔ ".join(rt.street_names[:3]) + (" ..." if len(rt.street_names) > 3 else "")
     diff_html = ""
     if not is_rec and baseline_time is not None:
         delta_m = rt.estimated_travel_time_min - baseline_time
         if delta_m > 0:
-            diff_html = f"<div style='font-size:0.78rem;color:#DC2626;font-weight:600;'>+{delta_m:.1f} min vs recommended</div>"
+            diff_html = f'<div class="route-delta route-delta-slower">+{delta_m:.1f} min vs recommended</div>'
         elif delta_m < 0:
-            diff_html = f"<div style='font-size:0.78rem;color:#059669;font-weight:600;'>{delta_m:.1f} min faster</div>"
+            diff_html = f'<div class="route-delta route-delta-faster">{abs(delta_m):.1f} min faster</div>'
 
     st.markdown(
         f"""
         <div class="{card_cls}">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <div class="route-card-header">
                 <div>{badge_html}</div>
-                <div><span style="font-size:0.68rem;color:#64748B;font-weight:700;margin-right:5px;">ROUTE</span>{status_pill_html(rt.predicted_congestion, friendly=False)}</div>
+                <div class="route-card-status"><span>CONGESTION</span>{status_pill_html(rt.predicted_congestion, friendly=False)}</div>
             </div>
-            <div style="font-size:1.02rem;font-weight:700;color:#0F172A;margin-bottom:4px;">{route_title}</div>
-            <div style="font-size:0.86rem;color:#334155;line-height:1.6;">
-                <b>Travel Time:</b> {rt.estimated_travel_time_min:.1f} min &nbsp;|&nbsp; <b>Distance:</b> {rt.distance_km:.2f} km<br>
-                <b>Congestion Risk:</b> {_friendly_risk_label(rt.average_risk_score)}<br>
-                <b>Route:</b> {' ➔ '.join(rt.junction_path)}<br>
-                <span style="font-size:0.78rem;color:#64748B;">Via: {streets}</span>
+            <div class="route-card-title">{route_title}</div>
+            <div class="route-card-stats">
+                <div><span>Travel time</span><strong>{rt.estimated_travel_time_min:.1f} min</strong></div>
+                <div><span>Distance</span><strong>{rt.distance_km:.2f} km</strong></div>
+                <div><span>Risk</span><strong>{_risk_category_label(rt.average_risk_score)}</strong></div>
             </div>
+            <div class="route-card-path"><span>Junctions</span>{' → '.join(rt.junction_path)}</div>
+            <div class="route-card-via">Via {streets}</div>
             {diff_html}
         </div>
         """,
         unsafe_allow_html=True,
     )
     if not is_rec:
-        if st.button("View on Map", key=btn_key, width="stretch"):
+        button_label = "Showing on Map" if is_selected else "View on Map"
+        button_type = "primary" if is_selected else "secondary"
+        if st.button(button_label, key=btn_key, type=button_type, width="stretch"):
             st.session_state[selected_alt_key] = rt
             st.rerun()
     else:
@@ -191,6 +242,7 @@ def render_user_dashboard(
 ) -> None:
     """Render the Light Consumer Smart Navigation & Route Finder for Normal Users."""
     verified_user = auth.require_authenticated(auth_token)
+    theme_mode = _active_streamlit_theme_mode()
     junctions = predictor.junctions
     snap_df = predictor.get_latest_common_snapshot()
     emg_mgr = _get_emergency_manager()
@@ -198,10 +250,10 @@ def render_user_dashboard(
     canon_page = USER_PAGE_ALIASES.get(requested_page, requested_page)
     current_page = canon_page if canon_page in USER_PAGES else "Home"
 
-    # Top Navigation Header Bar (Logo + 7 Tabs + Signed-in User + Logout)
+    # Compact primary navigation with less-used pages grouped in a menu.
     with st.container():
         st.markdown('<div class="nav-header-bar">', unsafe_allow_html=True)
-        h_brand, h_nav, h_user = st.columns([1.35, 3.2, 1.15])
+        h_brand, h_nav, h_more, h_user = st.columns([1.25, 2.8, 0.9, 1.15])
         with h_brand:
             st.markdown(
                 "<div style='font-size:1.05rem;font-weight:800;color:#0F172A;padding-top:4px;'>"
@@ -210,26 +262,41 @@ def render_user_dashboard(
                 unsafe_allow_html=True,
             )
         with h_nav:
-            nav_cols = st.columns(len(USER_PAGES))
-            for idx, pg in enumerate(USER_PAGES):
+            nav_cols = st.columns(len(USER_PRIMARY_PAGES))
+            for idx, pg in enumerate(USER_PRIMARY_PAGES):
                 with nav_cols[idx]:
                     btn_type = "primary" if current_page == pg else "secondary"
-                    if st.button(pg, key=f"usr_nav_{pg}", type=btn_type, width="stretch"):
+                    if st.button(
+                        USER_NAV_LABELS.get(pg, pg),
+                        key=f"usr_nav_{pg}",
+                        type=btn_type,
+                        width="stretch",
+                        help=f"Open {pg}",
+                    ):
                         st.session_state["nav_page"] = pg
                         st.query_params["page"] = pg
                         st.session_state["_last_qp_page"] = pg
+                        st.session_state["usr_nav_more"] = "More"
                         st.rerun()
 
-                    # Provide legacy alias button keys invisibly if clicked programmatically by tests
-                    for alias_name, target_canon in USER_PAGE_ALIASES.items():
-                        if target_canon == pg:
-                            alias_key = f"usr_nav_{alias_name}"
-                            if st.session_state.get(alias_key):
-                                st.session_state[alias_key] = False
-                                st.session_state["nav_page"] = pg
-                                st.query_params["page"] = pg
-                                st.session_state["_last_qp_page"] = pg
-                                st.rerun()
+        with h_more:
+            more_options = ("More",) + USER_MORE_PAGES
+            more_default = current_page if current_page in USER_MORE_PAGES else "More"
+            if "usr_nav_more" not in st.session_state:
+                st.session_state["usr_nav_more"] = more_default
+            more_page = st.selectbox(
+                "More pages",
+                options=more_options,
+                index=more_options.index(more_default),
+                key="usr_nav_more",
+                label_visibility="collapsed",
+                help="Open alerts, emergency information, or account settings.",
+            )
+            if more_page in USER_MORE_PAGES and more_page != current_page:
+                st.session_state["nav_page"] = more_page
+                st.query_params["page"] = more_page
+                st.session_state["_last_qp_page"] = more_page
+                st.rerun()
 
         with h_user:
             u_c1, u_c2 = st.columns([1.2, 0.9])
@@ -269,7 +336,7 @@ def render_user_dashboard(
     # 1. HOME (Map-First Navigation Experience)
     # =========================================================================
     if current_page == "Home":
-        col_left, col_map = st.columns([1.0, 1.85])
+        col_left, col_map = st.columns([0.82, 2.18])
         with col_left:
             with st.container(border=True):
                 st.markdown("#### Plan Your Trip")
@@ -338,6 +405,13 @@ def render_user_dashboard(
             map_title = f"Gandhipuram Real-Street Traffic Map (Current Snapshot)"
 
         with col_map:
+            if home_route_res:
+                _render_trip_summary(
+                    home_route_res.ai_recommended_route,
+                    home_route_res.origin,
+                    home_route_res.destination,
+                    home_route_res.departure_timestamp,
+                )
             clicked_home = render_traffic_map(
                 nodes=home_nodes,
                 road_network=road_network,
@@ -345,13 +419,14 @@ def render_user_dashboard(
                 ai_route=home_route_res.ai_recommended_route if home_route_res else None,
                 alternative_routes=home_route_res.alternative_routes if home_route_res else None,
                 selected_alt_route=st.session_state.get("usr_home_alt"),
-                theme_mode="light",
+                theme_mode=theme_mode,
                 title=map_title,
                 key_prefix="usr_home_map",
                 default_height=580,
                 fit_to_routes=home_route_res is not None,
                 tiles_available=tiles_available,
                 simulate_tile_failure=simulate_tile_failure,
+                allow_congestion_overlay_toggle=True,
             )
             _apply_user_map_click(clicked_home, "usr_home_sel_j", "_usr_home_last_click")
 
@@ -414,13 +489,14 @@ def render_user_dashboard(
             clicked_tr = render_traffic_map(
                 nodes=tr_nodes,
                 road_network=road_network,
-                theme_mode="light",
+                theme_mode=theme_mode,
                 title="Gandhipuram Traffic Status Map",
                 key_prefix="usr_tr_map",
                 default_height=520,
                 fit_to_routes=False,
                 tiles_available=tiles_available,
                 simulate_tile_failure=simulate_tile_failure,
+                allow_congestion_overlay_toggle=True,
             )
             _apply_user_map_click(clicked_tr, "usr_tr_sel_j", "_usr_tr_last_click")
         with col_td:
@@ -462,7 +538,7 @@ def render_user_dashboard(
             unsafe_allow_html=True,
         )
 
-        col_panel, col_map = st.columns([1.0, 1.65])
+        col_panel, col_map = st.columns([0.82, 2.0])
 
         with col_panel:
             with st.container(border=True):
@@ -585,6 +661,18 @@ def render_user_dashboard(
 
         with col_map:
             if res_bundle:
+                _render_trip_summary(
+                    res_bundle.ai_recommended_route,
+                    res_bundle.origin,
+                    res_bundle.destination,
+                    res_bundle.departure_timestamp,
+                )
+                show_alternatives_on_map = st.toggle(
+                    "Show alternative routes on map",
+                    value=False,
+                    key="usr_rt_show_alternatives",
+                    help="Keep the map focused on the recommended route, or show the other options too.",
+                )
                 fc_rt = {
                     name: JunctionForecast(**forecast)
                     for name, forecast in res_bundle.junction_forecasts.items()
@@ -600,17 +688,20 @@ def render_user_dashboard(
                 clicked_map_j = render_traffic_map(
                     nodes=rt_nodes,
                     road_network=road_network,
-                    shortest_route=res_bundle.shortest_route,
+                    shortest_route=res_bundle.shortest_route if show_alternatives_on_map else None,
                     ai_route=res_bundle.ai_recommended_route,
-                    alternative_routes=res_bundle.alternative_routes,
-                    selected_alt_route=st.session_state.get("usr_rt_alt_view"),
-                    theme_mode="light",
+                    alternative_routes=res_bundle.alternative_routes if show_alternatives_on_map else [],
+                    selected_alt_route=(
+                        st.session_state.get("usr_rt_alt_view") if show_alternatives_on_map else None
+                    ),
+                    theme_mode=theme_mode,
                     title=f"Route: {res_bundle.origin} ➔ {res_bundle.destination} (Departure {res_bundle.departure_timestamp})",
                     key_prefix="usr_rt_map",
                     default_height=600,
                     fit_to_routes=True,
                     tiles_available=tiles_available,
                     simulate_tile_failure=simulate_tile_failure,
+                    allow_congestion_overlay_toggle=True,
                 )
                 _apply_user_map_click(clicked_map_j, "usr_rt_sel_j", "_usr_rt_last_click")
 
@@ -632,6 +723,21 @@ def render_user_dashboard(
 
         now = datetime.now().replace(second=0, microsecond=0)
         default_target = now + timedelta(hours=2)
+        quick_pick_left, quick_pick_right = st.columns(2)
+        with quick_pick_left:
+            if st.button("Tomorrow morning · 08:00", key="usr_fc_tomorrow_am", width="stretch"):
+                st.session_state["usr_fc_date"] = now.date() + timedelta(days=1)
+                st.session_state["usr_fc_time"] = time(8, 0)
+        with quick_pick_right:
+            days_until_friday = (4 - now.weekday()) % 7
+            friday_date = now.date() + timedelta(days=days_until_friday)
+            friday_evening = datetime.combine(friday_date, time(18, 0))
+            if friday_evening <= now:
+                friday_date += timedelta(days=7)
+            if st.button("Friday evening · 18:00", key="usr_fc_friday_pm", width="stretch"):
+                st.session_state["usr_fc_date"] = friday_date
+                st.session_state["usr_fc_time"] = time(18, 0)
+        st.caption("Quick picks set the date and time below. You can still adjust either value.")
         col_fc1, col_fc2, col_fc3 = st.columns([1.3, 1.0, 1.0])
         with col_fc1:
             sel_fc_j = st.selectbox("Select Junction", options=junctions, index=0, key="usr_fc_junc")
@@ -693,12 +799,13 @@ def render_user_dashboard(
                 render_traffic_map(
                     nodes=fc_nodes,
                     road_network=road_network,
-                    theme_mode="light",
+                    theme_mode=theme_mode,
                     title=f"Estimated Traffic Across Gandhipuram ({target_datetime:%d-%m-%Y %H:%M})",
                     key_prefix="usr_future_map",
                     default_height=460,
                     tiles_available=tiles_available,
                     simulate_tile_failure=simulate_tile_failure,
+                    allow_congestion_overlay_toggle=True,
                 )
             with col_fct:
                 junction_rows = predictor.df[predictor.df["Location"] == sel_fc_j]
@@ -744,7 +851,7 @@ def render_user_dashboard(
                     f"{sel_fc_j} Typical Daily Speed Profile",
                     x_title="Time of Day",
                     y_title="Speed (km/h)",
-                    theme_mode="light",
+                    theme_mode=theme_mode,
                 )
                 st.plotly_chart(fig_traj, width="stretch")
 
@@ -783,13 +890,14 @@ def render_user_dashboard(
             render_traffic_map(
                 nodes=al_nodes,
                 road_network=road_network,
-                theme_mode="light",
+                theme_mode=theme_mode,
                 title=f"Alert Focus Map ({focus_j or 'Network Overview'})",
                 key_prefix="usr_alerts_map",
                 focus_junction=focus_j,
                 default_height=500,
                 tiles_available=tiles_available,
                 simulate_tile_failure=simulate_tile_failure,
+                allow_congestion_overlay_toggle=True,
             )
 
         with col_alc:
@@ -867,12 +975,13 @@ def render_user_dashboard(
                 render_traffic_map(
                     nodes=em_nodes,
                     road_network=road_network,
-                    theme_mode="light",
+                    theme_mode=theme_mode,
                     title=f"Active Emergency Corridor ({active_ev.vehicle_type})",
                     key_prefix="usr_emg_map",
                     default_height=480,
                     tiles_available=tiles_available,
                     simulate_tile_failure=simulate_tile_failure,
+                    allow_congestion_overlay_toggle=True,
                 )
             with col_em2:
                 with st.container(border=True):
